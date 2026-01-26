@@ -8,7 +8,7 @@ import { useReadingHistory } from "@/components/reading-history-provider"
 import { useVerses } from "@/hooks/use-verses"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ChevronLeft, ChevronRight, Home, CheckCheck } from "lucide-react"
+import { ChevronLeft, ChevronRight, Home, CheckCheck, Eye } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface VerseReaderProps {
@@ -159,7 +159,7 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
           </div>
         )}
 
-        {/* Verses with dimming effect */}
+        {/* Verses with eye icon for read status */}
         {!isLoading && !error && (
           <div className="space-y-4">
             {verses.map((verse, index) => {
@@ -169,20 +169,16 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
                 <p
                   key={index}
                   onClick={() => handleVerseClick(verseNumber)}
-                  className={cn(
-                    "font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-all duration-200",
-                    "hover:bg-secondary/30 active:bg-secondary/50",
-                    isRead
-                      ? "opacity-100"
-                      : "opacity-50"
-                  )}
+                  className="font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-colors hover:bg-secondary/30 active:bg-secondary/50"
                 >
-                  <sup className={cn(
-                    "mr-1 text-xs font-sans select-none transition-colors",
-                    isRead ? "text-primary font-semibold" : "text-muted-foreground"
-                  )}>
-                    {verseNumber}
-                  </sup>
+                  <span className="inline-flex items-baseline gap-1 mr-1">
+                    <sup className="text-xs font-sans text-muted-foreground select-none">
+                      {verseNumber}
+                    </sup>
+                    {isRead && (
+                      <Eye className="inline-block h-3 w-3 text-primary translate-y-[-2px]" />
+                    )}
+                  </span>
                   {verse}
                 </p>
               )
