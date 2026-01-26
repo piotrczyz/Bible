@@ -44,7 +44,7 @@ export function SettingsSheet() {
           <SheetTitle>Settings</SheetTitle>
         </SheetHeader>
 
-        <div className="mt-8 space-y-8">
+        <div className="mt-8 space-y-8 px-4">
           {/* Bible Version Selection */}
           <div className="space-y-3">
             <label className="text-sm font-medium flex items-center gap-2">

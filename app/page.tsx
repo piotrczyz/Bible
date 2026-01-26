@@ -7,7 +7,7 @@ import { ChapterGrid } from "@/components/chapter-grid"
 import { VerseReader } from "@/components/verse-reader"
 import { SettingsSheet } from "@/components/settings-sheet"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, BookOpen } from "lucide-react"
+import { ChevronLeft, ChevronRight, BookOpen, Home } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type View = "books" | "chapters" | "reader"
@@ -44,6 +44,11 @@ export default function BibleApp() {
       setView("books")
       setSelectedBook(null)
     }
+  }
+
+  const handleHome = () => {
+    setView("books")
+    setSelectedBook(null)
   }
 
   return (
@@ -122,12 +127,42 @@ export default function BibleApp() {
 
         {/* Chapter Selection View */}
         {view === "chapters" && selectedBook && (
-          <div className="px-4 py-6">
-            <p className="mb-4 text-sm text-muted-foreground">
-              {selectedBook.chapters} chapters
-            </p>
-            <ChapterGrid book={selectedBook} onSelectChapter={handleSelectChapter} />
-          </div>
+          <>
+            <div className="px-4 py-6 pb-24">
+              <p className="mb-4 text-sm text-muted-foreground">
+                {selectedBook.chapters} chapters
+              </p>
+              <ChapterGrid book={selectedBook} onSelectChapter={handleSelectChapter} />
+            </div>
+
+            {/* Bottom Navigation */}
+            <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80">
+              <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBack}
+                  className="gap-1 text-muted-foreground hover:text-foreground"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="sm:hidden">Back</span>
+                  <span className="hidden sm:inline">Back</span>
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleHome}
+                  className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                >
+                  <Home className="h-5 w-5" />
+                  <span className="sr-only">Home</span>
+                </Button>
+
+                <div className="w-[68px]" />
+              </div>
+            </div>
+          </>
         )}
 
         {/* Reader View */}
@@ -136,6 +171,7 @@ export default function BibleApp() {
             book={selectedBook}
             chapter={selectedChapter}
             onNavigate={handleNavigate}
+            onHome={handleHome}
           />
         )}
       </main>
