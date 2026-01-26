@@ -8,6 +8,16 @@
 **Type:** Cross-platform mobile application (Web + iOS + Android)
 **Tech Stack:** Web app with Capacitor wrapper
 **Development Model:** AI-driven development with human oversight
+**Project Status:** Non-profit / Open Source
+
+### Licensing & Dependencies
+
+This is a **non-profit project**. All dependencies must be:
+- Open source with permissive licenses (MIT, Apache 2.0, BSD, ISC)
+- Free for non-commercial use
+- No proprietary or paid-tier-only features
+
+When selecting libraries or tools, AI must verify license compatibility.
 
 ## Development Philosophy
 
@@ -270,11 +280,12 @@ Before submitting code for review:
 | Date | Decision | Rationale | Decided By |
 |------|----------|-----------|------------|
 | 2026-01-26 | AI-driven development model | Leverage AI for implementation while maintaining human oversight | Architect |
-| 2026-01-26 | Capacitor for mobile | Single codebase for web, iOS, Android | Architect |
-| 2026-01-26 | Next.js with React | Modern React framework with SSR/SSG capabilities | Architect |
-| 2026-01-26 | Tailwind CSS | Best Figma-to-code compatibility, utility-first approach | Architect |
+| 2026-01-26 | Non-profit, open source only | All dependencies must have permissive OSS licenses | Architect |
+| 2026-01-26 | Capacitor for mobile | Single codebase for web, iOS, Android (MIT license) | Architect |
+| 2026-01-26 | Next.js with React | Modern React framework with SSR/SSG capabilities (MIT license) | Architect |
+| 2026-01-26 | Tailwind CSS | Best Figma-to-code compatibility, utility-first approach (MIT license) | Architect |
 | 2026-01-26 | Figma Make for UI | Design-to-code workflow, generates Tailwind-compatible React | Architect |
-| TBD | UI Component Library | Must be Tailwind-based (shadcn/ui, Radix, Headless UI) | Architect |
+| TBD | UI Component Library | Must be Tailwind-based and MIT licensed (shadcn/ui, Radix, Headless UI) | Architect |
 
 ## Environment Setup
 
@@ -331,12 +342,14 @@ npx cap open android
 
 ### Pending Decisions
 
+All options below are open source with MIT license:
+
 | Category | Options | Status |
 |----------|---------|--------|
-| UI Components | shadcn/ui, Radix UI, Headless UI | TBD by Architect |
-| State Management | Zustand, Jotai, React Context | TBD by Architect |
-| Data Fetching | TanStack Query, SWR | TBD by Architect |
-| Form Handling | React Hook Form, Formik | TBD by Architect |
+| UI Components | shadcn/ui (MIT), Radix UI (MIT), Headless UI (MIT) | TBD by Architect |
+| State Management | Zustand (MIT), Jotai (MIT), React Context (built-in) | TBD by Architect |
+| Data Fetching | TanStack Query (MIT), SWR (MIT) | TBD by Architect |
+| Form Handling | React Hook Form (MIT), Formik (Apache 2.0) | TBD by Architect |
 
 ## Troubleshooting
 
