@@ -1,9 +1,10 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useEffect } from "react"
 import { type Book, bibleBooks, getBook } from "@/lib/bible-data"
 import { useSettings } from "@/components/settings-provider"
 import { useLanguage } from "@/components/language-provider"
+import { useReadingHistory } from "@/components/reading-history-provider"
 import { useVerses } from "@/hooks/use-verses"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -20,7 +21,15 @@ interface VerseReaderProps {
 export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderProps) {
   const { fontSize, versionId, currentVersion } = useSettings()
   const { t } = useLanguage()
+  const { recordChapterRead } = useReadingHistory()
   const { verses, isLoading, error } = useVerses(versionId, book.id, chapter)
+
+  // Record chapter read when verses are loaded successfully
+  useEffect(() => {
+    if (!isLoading && !error && verses.length > 0) {
+      recordChapterRead(book.id, chapter, versionId)
+    }
+  }, [book.id, chapter, versionId, isLoading, error, verses.length, recordChapterRead])
 
   // Get translated book name
   const getBookName = (b: Book) => {
