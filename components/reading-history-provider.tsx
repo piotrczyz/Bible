@@ -9,25 +9,21 @@ import {
 const STORAGE_KEY = "bible-reading-history"
 const MAX_RECORDS = 1000 // Limit to prevent excessive storage usage
 
-interface ChapterContext {
-  bookId: string
-  chapter: number
-  versionId: string
-}
-
 interface ReadingHistoryContextType {
   /** All reading records, sorted by timestamp (newest first) */
   records: ReadingRecord[]
-  /** Currently read verses for the active chapter */
-  readVerses: Set<number>
-  /** Set current chapter context and load its read verses */
+  /** Currently selected verses for the active chapter */
+  selectedVerses: Set<number>
+  /** Set current chapter context - creates a new timeline record */
   setChapterContext: (bookId: string, chapter: number, versionId: string) => void
-  /** Toggle a verse as read/unread (auto-saves) */
+  /** Toggle a verse selection (auto-saves to current record) */
   toggleVerse: (verse: number) => void
-  /** Mark all verses as read (auto-saves) */
-  markAllRead: (totalVerses: number) => void
-  /** Mark all verses as unread (auto-saves) */
-  markAllUnread: () => void
+  /** Select all verses (auto-saves to current record) */
+  selectAllVerses: (totalVerses: number) => void
+  /** Clear current selection (auto-saves to current record) */
+  clearSelection: () => void
+  /** Reset selection UI without saving (for fresh starts) */
+  resetSelection: () => void
   /** Delete a specific reading record */
   deleteRecord: (recordId: string) => void
   /** Clear all reading history */
@@ -42,8 +38,13 @@ const ReadingHistoryContext = React.createContext<ReadingHistoryContextType | un
 
 export function ReadingHistoryProvider({ children }: { children: React.ReactNode }) {
   const [records, setRecords] = React.useState<ReadingRecord[]>([])
-  const [readVerses, setReadVerses] = React.useState<Set<number>>(new Set())
-  const [currentChapter, setCurrentChapter] = React.useState<ChapterContext | null>(null)
+  const [selectedVerses, setSelectedVerses] = React.useState<Set<number>>(new Set())
+  const [currentRecordId, setCurrentRecordId] = React.useState<string | null>(null)
+  const [currentContext, setCurrentContext] = React.useState<{
+    bookId: string
+    chapter: number
+    versionId: string
+  } | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
 
   // Load records from localStorage on mount
@@ -79,120 +80,122 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
     }
   }, [])
 
-  // Find existing record for a chapter
-  const findChapterRecord = React.useCallback(
-    (bookId: string, chapter: number, versionId: string) => {
-      return records.find(
-        r => r.bookId === bookId && r.chapter === chapter && r.versionId === versionId
-      )
-    },
-    [records]
-  )
+  // Update current record's verses
+  const updateCurrentRecord = React.useCallback((newVerses: Set<number>) => {
+    if (!currentRecordId) return
 
-  // Set chapter context and load read verses
+    setRecords(prev => {
+      const updated = prev.map(record => {
+        if (record.id === currentRecordId) {
+          return { ...record, verses: Array.from(newVerses).sort((a, b) => a - b) }
+        }
+        return record
+      })
+      saveRecords(updated)
+      return updated
+    })
+  }, [currentRecordId, saveRecords])
+
+  // Set chapter context - stores context for later record creation
   const setChapterContext = React.useCallback(
     (bookId: string, chapter: number, versionId: string) => {
-      setCurrentChapter({ bookId, chapter, versionId })
-
-      // Load existing read verses for this chapter
-      const existingRecord = findChapterRecord(bookId, chapter, versionId)
-      if (existingRecord) {
-        setReadVerses(new Set(existingRecord.verses))
-      } else {
-        setReadVerses(new Set())
-      }
+      // Store context but don't create record until verses are selected
+      setCurrentContext({ bookId, chapter, versionId })
+      setCurrentRecordId(null)
+      setSelectedVerses(new Set())
     },
-    [findChapterRecord]
+    []
   )
 
-  // Update or create record for current chapter
-  const updateChapterRecord = React.useCallback(
-    (newVerses: Set<number>) => {
-      if (!currentChapter) return
+  // Create a new record for the current context
+  const createRecord = React.useCallback((verses: Set<number>) => {
+    if (!currentContext || verses.size === 0) return null
 
-      const { bookId, chapter, versionId } = currentChapter
-      const versesArray = Array.from(newVerses)
+    const newRecord = createReadingRecord(
+      currentContext.bookId,
+      currentContext.chapter,
+      Array.from(verses),
+      currentContext.versionId
+    )
 
-      setRecords(prev => {
-        // Find existing record index
-        const existingIndex = prev.findIndex(
-          r => r.bookId === bookId && r.chapter === chapter && r.versionId === versionId
-        )
+    setRecords(prev => {
+      let updated = [newRecord, ...prev]
+      if (updated.length > MAX_RECORDS) {
+        updated = updated.slice(0, MAX_RECORDS)
+      }
+      saveRecords(updated)
+      return updated
+    })
 
-        let updated: ReadingRecord[]
+    setCurrentRecordId(newRecord.id)
+    return newRecord.id
+  }, [currentContext, saveRecords])
 
-        if (versesArray.length === 0) {
-          // No verses read - remove the record if it exists
-          if (existingIndex >= 0) {
-            updated = prev.filter((_, i) => i !== existingIndex)
-          } else {
-            return prev // No changes needed
-          }
-        } else if (existingIndex >= 0) {
-          // Update existing record
-          updated = [...prev]
-          updated[existingIndex] = {
-            ...updated[existingIndex],
-            verses: versesArray.sort((a, b) => a - b),
-            timestamp: new Date().toISOString(),
-          }
-          // Move to front (most recent)
-          const [record] = updated.splice(existingIndex, 1)
-          updated.unshift(record)
+  // Toggle verse selection (auto-saves)
+  const toggleVerse = React.useCallback((verse: number) => {
+    setSelectedVerses(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(verse)) {
+        newSet.delete(verse)
+      } else {
+        newSet.add(verse)
+      }
+
+      // Create record on first verse selection, update on subsequent
+      if (newSet.size > 0) {
+        if (currentRecordId) {
+          updateCurrentRecord(newSet)
         } else {
-          // Create new record
-          const newRecord = createReadingRecord(bookId, chapter, versesArray, versionId)
-          updated = [newRecord, ...prev]
-
-          // Trim if exceeding max records
-          if (updated.length > MAX_RECORDS) {
-            updated = updated.slice(0, MAX_RECORDS)
-          }
+          createRecord(newSet)
         }
+      } else if (currentRecordId) {
+        // All verses deselected - remove the record
+        setRecords(prevRecords => {
+          const updated = prevRecords.filter(r => r.id !== currentRecordId)
+          saveRecords(updated)
+          return updated
+        })
+        setCurrentRecordId(null)
+      }
 
+      return newSet
+    })
+  }, [currentRecordId, updateCurrentRecord, createRecord, saveRecords])
+
+  // Select all verses (auto-saves)
+  const selectAllVerses = React.useCallback((totalVerses: number) => {
+    const allVerses = new Set<number>()
+    for (let i = 1; i <= totalVerses; i++) {
+      allVerses.add(i)
+    }
+    setSelectedVerses(allVerses)
+
+    if (currentRecordId) {
+      updateCurrentRecord(allVerses)
+    } else {
+      createRecord(allVerses)
+    }
+  }, [currentRecordId, updateCurrentRecord, createRecord])
+
+  // Clear selection (removes record if exists)
+  const clearSelection = React.useCallback(() => {
+    setSelectedVerses(new Set())
+
+    if (currentRecordId) {
+      // Remove the record since no verses are selected
+      setRecords(prev => {
+        const updated = prev.filter(r => r.id !== currentRecordId)
         saveRecords(updated)
         return updated
       })
-    },
-    [currentChapter, saveRecords]
-  )
+      setCurrentRecordId(null)
+    }
+  }, [currentRecordId, saveRecords])
 
-  // Toggle verse read status
-  const toggleVerse = React.useCallback(
-    (verse: number) => {
-      setReadVerses(prev => {
-        const newSet = new Set(prev)
-        if (newSet.has(verse)) {
-          newSet.delete(verse)
-        } else {
-          newSet.add(verse)
-        }
-        // Auto-save
-        updateChapterRecord(newSet)
-        return newSet
-      })
-    },
-    [updateChapterRecord]
-  )
-
-  // Mark all verses as read
-  const markAllRead = React.useCallback(
-    (totalVerses: number) => {
-      const allVerses = new Set<number>()
-      for (let i = 1; i <= totalVerses; i++) {
-        allVerses.add(i)
-      }
-      setReadVerses(allVerses)
-      updateChapterRecord(allVerses)
-    },
-    [updateChapterRecord]
-  )
-
-  // Mark all verses as unread
-  const markAllUnread = React.useCallback(() => {
-    setReadVerses(new Set())
-    updateChapterRecord(new Set())
-  }, [updateChapterRecord])
+  // Reset selection UI without saving (for fresh starts on mount)
+  const resetSelection = React.useCallback(() => {
+    setSelectedVerses(new Set())
+  }, [])
 
   // Delete a specific record
   const deleteRecord = React.useCallback(
@@ -202,14 +205,20 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
         saveRecords(updated)
         return updated
       })
+      // If deleting current record, clear selection
+      if (recordId === currentRecordId) {
+        setCurrentRecordId(null)
+        setSelectedVerses(new Set())
+      }
     },
-    [saveRecords]
+    [saveRecords, currentRecordId]
   )
 
   // Clear all history
   const clearHistory = React.useCallback(() => {
     setRecords([])
-    setReadVerses(new Set())
+    setSelectedVerses(new Set())
+    setCurrentRecordId(null)
     try {
       localStorage.removeItem(STORAGE_KEY)
     } catch (error) {
@@ -221,11 +230,12 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
     <ReadingHistoryContext.Provider
       value={{
         records,
-        readVerses,
+        selectedVerses,
         setChapterContext,
         toggleVerse,
-        markAllRead,
-        markAllUnread,
+        selectAllVerses,
+        clearSelection,
+        resetSelection,
         deleteRecord,
         clearHistory,
         isLoading,

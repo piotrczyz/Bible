@@ -64,6 +64,8 @@ export interface Translations {
   verseSelected: string;
   versesSelected: string;
   selectAll: string;
+  clearSelection: string;
+  saveToTimeline: string;
   markAllRead: string;
   markAllUnread: string;
   save: string;
@@ -191,6 +193,8 @@ const en: Translations = {
   verseSelected: "verse",
   versesSelected: "verses",
   selectAll: "Select all",
+  clearSelection: "Clear selection",
+  saveToTimeline: "Save to timeline",
   markAllRead: "Mark all read",
   markAllUnread: "Mark all unread",
   save: "Save",
@@ -318,6 +322,8 @@ const pl: Translations = {
   verseSelected: "werset",
   versesSelected: "wersetów",
   selectAll: "Zaznacz wszystko",
+  clearSelection: "Wyczyść zaznaczenie",
+  saveToTimeline: "Zapisz do historii",
   markAllRead: "Oznacz wszystko jako przeczytane",
   markAllUnread: "Oznacz wszystko jako nieprzeczytane",
   save: "Zapisz",
@@ -445,6 +451,8 @@ const no: Translations = {
   verseSelected: "vers",
   versesSelected: "vers",
   selectAll: "Velg alle",
+  clearSelection: "Fjern valg",
+  saveToTimeline: "Lagre til tidslinje",
   markAllRead: "Merk alle som lest",
   markAllUnread: "Merk alle som ulest",
   save: "Lagre",

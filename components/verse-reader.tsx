@@ -22,15 +22,25 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
   const { fontSize, versionId, currentVersion } = useSettings()
   const { t } = useLanguage()
   const {
-    readVerses,
+    selectedVerses,
     setChapterContext,
     toggleVerse,
-    markAllRead,
-    markAllUnread,
+    selectAllVerses,
+    clearSelection,
+    resetSelection,
   } = useReadingHistory()
   const { verses, isLoading, error } = useVerses(versionId, book.id, chapter)
 
-  // Set chapter context when entering a chapter (loads existing read verses)
+  // Clear selection on mount (fresh start for every chapter visit)
+  const hasInitialized = useRef(false)
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      resetSelection()
+      hasInitialized.current = true
+    }
+  }, [resetSelection])
+
+  // Set chapter context when chapter changes (creates new timeline record)
   useEffect(() => {
     setChapterContext(book.id, chapter, versionId)
   }, [book.id, chapter, versionId, setChapterContext])
@@ -40,12 +50,12 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
     toggleVerse(verseNumber)
   }
 
-  // Handle mark all toggle
-  const handleMarkAllToggle = () => {
-    if (readVerses.size === verses.length && verses.length > 0) {
-      markAllUnread()
+  // Handle select all toggle
+  const handleSelectAllToggle = () => {
+    if (selectedVerses.size === verses.length && verses.length > 0) {
+      clearSelection()
     } else {
-      markAllRead(verses.length)
+      selectAllVerses(verses.length)
     }
   }
 
@@ -116,7 +126,7 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
     touchStartRef.current = null
   }
 
-  const allRead = readVerses.size === verses.length && verses.length > 0
+  const allSelected = selectedVerses.size === verses.length && verses.length > 0
 
   return (
     <div
@@ -164,7 +174,7 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
           <div className="space-y-4">
             {verses.map((verse, index) => {
               const verseNumber = index + 1
-              const isRead = readVerses.has(verseNumber)
+              const isSelected = selectedVerses.has(verseNumber)
               return (
                 <p
                   key={index}
@@ -175,7 +185,7 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
                     <sup className="text-xs font-sans text-muted-foreground select-none">
                       {verseNumber}
                     </sup>
-                    {isRead && (
+                    {isSelected && (
                       <Check className="inline-block h-3 w-3 text-primary translate-y-[-2px]" />
                     )}
                   </span>
@@ -214,15 +224,15 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleMarkAllToggle}
+              onClick={handleSelectAllToggle}
               className="h-9 w-9 text-muted-foreground hover:text-foreground"
-              title={allRead ? (t.markAllUnread || "Mark all unread") : (t.markAllRead || "Mark all read")}
+              title={allSelected ? (t.clearSelection || "Clear selection") : (t.selectAll || "Select all")}
             >
               <CheckCheck className={cn(
                 "h-5 w-5",
-                allRead && "text-primary"
+                allSelected && "text-primary"
               )} />
-              <span className="sr-only">{t.selectAll || "Mark all"}</span>
+              <span className="sr-only">{t.selectAll || "Select all"}</span>
             </Button>
 
             <Button

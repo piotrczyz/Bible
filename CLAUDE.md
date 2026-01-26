@@ -246,13 +246,14 @@ All user data is stored in IndexedDB for offline access:
 
 #### Reading History Data Structure
 
-The `readingHistory` store tracks chapters read for the timeline feature. Designed for Firebase Firestore compatibility:
+The `readingHistory` store tracks individual verses read for the timeline feature. Designed for Firebase Firestore compatibility:
 
 ```typescript
 interface ReadingRecord {
   id: string;           // UUID v4 for sync conflict resolution
   bookId: string;       // e.g., "gen", "mat"
   chapter: number;      // Chapter number
+  verses: number[];     // Array of verse numbers read (1-indexed)
   versionId: string;    // Bible version used
   timestamp: string;    // ISO 8601: "2026-01-26T10:30:00.000Z"
 }
@@ -260,7 +261,7 @@ interface ReadingRecord {
 
 - **UUID IDs** prevent conflicts when syncing from multiple devices
 - **ISO 8601 timestamps** convert directly to Firestore Timestamp
-- **Chapter-level tracking** balances granularity with storage efficiency
+- **Verse-level tracking** with auto-save on selection
 - **Max 1000 records** stored to prevent excessive storage usage
 
 #### Data Schema Pattern
