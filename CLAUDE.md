@@ -64,27 +64,30 @@ Bible/
 ├── CLAUDE.md              # AI assistant guidelines (this file)
 ├── README.md              # Project documentation
 ├── package.json           # Dependencies and scripts
-├── next.config.js         # Next.js configuration
-├── tailwind.config.js     # Tailwind CSS configuration
-├── capacitor.config.ts    # Capacitor configuration
+├── next.config.mjs        # Next.js configuration
+├── postcss.config.mjs     # PostCSS configuration
 ├── tsconfig.json          # TypeScript configuration
-├── src/
-│   ├── app/               # Next.js App Router (pages, layouts, routes)
-│   │   ├── layout.tsx     # Root layout
-│   │   ├── page.tsx       # Home page
-│   │   └── [route]/       # Route directories
-│   ├── components/        # React components
-│   │   ├── ui/            # UI primitives (Figma-generated)
-│   │   └── features/      # Feature-specific components
-│   ├── lib/               # Shared utilities and helpers
-│   ├── hooks/             # Custom React hooks
-│   ├── services/          # API calls and business logic
-│   ├── types/             # TypeScript type definitions
-│   └── styles/            # Global styles and Tailwind customizations
+├── components.json        # shadcn/ui configuration
+├── app/                   # Next.js App Router
+│   ├── layout.tsx         # Root layout with providers
+│   ├── page.tsx           # Home page (main app)
+│   └── globals.css        # Global styles
+├── components/            # React components
+│   ├── ui/                # shadcn/ui primitives
+│   ├── book-list.tsx      # Book selection grid
+│   ├── chapter-grid.tsx   # Chapter selection
+│   ├── verse-reader.tsx   # Verse reading view
+│   ├── settings-sheet.tsx # Settings panel
+│   ├── settings-provider.tsx  # Settings context
+│   └── theme-provider.tsx # Theme context
+├── lib/                   # Utilities and data
+│   ├── bible-data.ts      # Bible books and verses
+│   └── utils.ts           # Utility functions
+├── hooks/                 # Custom React hooks
+├── styles/                # Additional styles
 ├── public/                # Static assets
-├── ios/                   # iOS native project (Capacitor-generated)
-├── android/               # Android native project (Capacitor-generated)
-└── __tests__/             # Test files
+├── ios/                   # iOS native project (Capacitor, future)
+└── android/               # Android native project (Capacitor, future)
 ```
 
 ## Development Workflow
@@ -112,6 +115,16 @@ Bible/
 - **Main branch:** Production-ready, human-approved code only
 - **Feature branches:** `feature/<description>` or `claude/<description>-<session-id>`
 - **Bugfix branches:** `fix/<description>`
+
+### Bug Workflow
+
+For issues labeled as `bug` in the repository:
+
+1. AI checks for bugs using `gh issue list --label bug`
+2. AI creates a fix branch: `fix/<issue-description>`
+3. AI implements the fix
+4. AI creates a PR for human review
+5. Human reviews and merges
 
 ### Commit Message Conventions
 
