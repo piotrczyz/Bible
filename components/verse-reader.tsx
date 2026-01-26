@@ -106,9 +106,11 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
       if (deltaX < 0 && next) {
         // Swipe left = next chapter
+        window.scrollTo({ top: 0, behavior: 'instant' })
         onNavigate(next.bookId, next.chapter)
       } else if (deltaX > 0 && prev) {
         // Swipe right = previous chapter
+        window.scrollTo({ top: 0, behavior: 'instant' })
         onNavigate(prev.bookId, prev.chapter)
       }
     }
@@ -193,7 +195,12 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => prev && onNavigate(prev.bookId, prev.chapter)}
+            onClick={() => {
+              if (prev) {
+                window.scrollTo({ top: 0, behavior: 'instant' })
+                onNavigate(prev.bookId, prev.chapter)
+              }
+            }}
             disabled={!prev}
             className={cn(
               "gap-1 text-muted-foreground hover:text-foreground",
@@ -239,7 +246,12 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => next && onNavigate(next.bookId, next.chapter)}
+            onClick={() => {
+              if (next) {
+                window.scrollTo({ top: 0, behavior: 'instant' })
+                onNavigate(next.bookId, next.chapter)
+              }
+            }}
             disabled={!next}
             className={cn(
               "gap-1 text-muted-foreground hover:text-foreground",
