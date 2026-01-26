@@ -64,16 +64,16 @@ Bible/
 ├── CLAUDE.md              # AI assistant guidelines (this file)
 ├── README.md              # Project documentation
 ├── package.json           # Dependencies and scripts
-├── next.config.js         # Next.js configuration
-├── tailwind.config.js     # Tailwind CSS configuration
-├── capacitor.config.ts    # Capacitor configuration
+├── next.config.mjs        # Next.js configuration
+├── postcss.config.mjs     # PostCSS configuration
 ├── tsconfig.json          # TypeScript configuration
-├── app/                   # Next.js App Router (pages, layouts, routes)
+├── components.json        # shadcn/ui configuration
+├── app/                   # Next.js App Router
 │   ├── layout.tsx         # Root layout with providers
 │   ├── page.tsx           # Home page (book/chapter/reader views)
 │   └── globals.css        # Global styles
 ├── components/            # React components
-│   ├── ui/                # UI primitives (shadcn/ui)
+│   ├── ui/                # shadcn/ui primitives
 │   ├── book-list.tsx      # Book selection grid
 │   ├── chapter-grid.tsx   # Chapter selection grid
 │   ├── verse-reader.tsx   # Verse display with navigation
@@ -124,6 +124,16 @@ Bible/
 - **Main branch:** Production-ready, human-approved code only
 - **Feature branches:** `feature/<description>` or `claude/<description>-<session-id>`
 - **Bugfix branches:** `fix/<description>`
+
+### Bug Workflow
+
+For issues labeled as `bug` in the repository:
+
+1. AI checks for bugs using `gh issue list --label bug`
+2. AI creates a fix branch: `fix/<issue-description>`
+3. AI implements the fix
+4. AI creates a PR for human review
+5. Human reviews and merges
 
 ### Commit Message Conventions
 
@@ -218,20 +228,25 @@ The app follows an **offline-first architecture**:
 
 ### Local Storage Strategy
 
-#### Current Implementation (localStorage)
+#### IndexedDB (via Dexie.js)
 
-For MVP, user data is stored in localStorage:
+All user data is stored in IndexedDB for offline access:
 
-| Key | Purpose | Data Type | Sync Priority |
-|-----|---------|-----------|---------------|
-| `bible-font-size` | Font size preference | `number` (14-24) | Low |
-| `bible-version-id` | Selected Bible version | `string` (e.g., "kjv") | Low |
-| `bible-language` | UI language | `"en" \| "pl" \| "no"` | Low |
-| `bible-reading-history` | Chapter read timestamps | `ReadingRecord[]` | Medium |
+| Store | Purpose | Sync Priority |
+|-------|---------|---------------|
+| `bibleContent` | Bible text (books, chapters, verses) | Initial download, rarely updated |
+| `userHighlights` | Verse highlights and colors | High - sync immediately |
+| `userBookmarks` | Bookmarked verses | High - sync immediately |
+| `userNotes` | Personal notes on verses | High - sync immediately |
+| `readingHistory` | Chapter read timestamps for timeline | Medium - sync periodically |
+| `readingProgress` | Last read position | Medium - sync periodically |
+| `settings` | User preferences (theme, font size, language) | Low - sync on change |
+| `syncQueue` | Pending changes to sync | Internal use |
+| `syncMetadata` | Last sync timestamps, versions | Internal use |
 
 #### Reading History Data Structure
 
-Designed for Firebase Firestore compatibility:
+The `readingHistory` store tracks chapters read for the timeline feature. Designed for Firebase Firestore compatibility:
 
 ```typescript
 interface ReadingRecord {
@@ -246,22 +261,7 @@ interface ReadingRecord {
 - **UUID IDs** prevent conflicts when syncing from multiple devices
 - **ISO 8601 timestamps** convert directly to Firestore Timestamp
 - **Chapter-level tracking** balances granularity with storage efficiency
-- **Max 1000 records** stored to prevent excessive localStorage usage
-
-#### Future: IndexedDB (via Dexie.js)
-
-For full offline support, user data will migrate to IndexedDB:
-
-| Store | Purpose | Sync Priority |
-|-------|---------|---------------|
-| `bibleContent` | Bible text (books, chapters, verses) | Initial download, rarely updated |
-| `userHighlights` | Verse highlights and colors | High - sync immediately |
-| `userBookmarks` | Bookmarked verses | High - sync immediately |
-| `userNotes` | Personal notes on verses | High - sync immediately |
-| `readingProgress` | Last read position, history | Medium - sync periodically |
-| `settings` | User preferences (theme, font size) | Low - sync on change |
-| `syncQueue` | Pending changes to sync | Internal use |
-| `syncMetadata` | Last sync timestamps, versions | Internal use |
+- **Max 1000 records** stored to prevent excessive storage usage
 
 #### Data Schema Pattern
 
@@ -584,7 +584,6 @@ Before submitting code for review:
 | 2026-01-26 | Figma Make for UI | Design-to-code workflow, generates Tailwind-compatible React | Architect |
 | 2026-01-26 | shadcn/ui | Best Figma ecosystem, copy-paste model, Radix primitives (MIT license) | Architect |
 | 2026-01-26 | React Context | Simple global state (theme, auth, settings), no extra dependencies | Architect |
-| 2026-01-26 | localStorage for MVP | Keep it simple, defer backend sync to future iteration | Architect |
 | 2026-01-26 | MVP scope: navigation only | Simple Bible navigation, defer highlights/AI search to future | Architect |
 | 2026-01-26 | Offline-first architecture | App must work fully offline; sync when connected | Architect |
 | 2026-01-26 | IndexedDB via Dexie.js | Robust local storage for offline data (Apache 2.0 license) | Architect |
@@ -604,7 +603,7 @@ Before submitting code for review:
 - Multiple Bible versions (KJV, ASV, WEB, BG, UBG)
 - **Reading history timeline** (tracks chapters read with timestamps)
 - **Offline support** (app works without network)
-- **Local data persistence** (localStorage, preparing for IndexedDB)
+- **Local data persistence** (IndexedDB via Dexie.js)
 - **Background sync** (when connected)
 
 ### Deferred (Future Features)
