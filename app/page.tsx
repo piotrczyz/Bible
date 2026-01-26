@@ -2,10 +2,13 @@
 
 import * as React from "react"
 import { type Book, getBook } from "@/lib/bible-data"
+import { formatString } from "@/lib/translations"
 import { BookList } from "@/components/book-list"
 import { ChapterGrid } from "@/components/chapter-grid"
 import { VerseReader } from "@/components/verse-reader"
 import { SettingsSheet } from "@/components/settings-sheet"
+import { TimelineSheet } from "@/components/timeline-sheet"
+import { useLanguage } from "@/components/language-provider"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, BookOpen, Home } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -18,6 +21,7 @@ export default function BibleApp() {
   const [selectedBook, setSelectedBook] = React.useState<Book | null>(null)
   const [selectedChapter, setSelectedChapter] = React.useState<number>(1)
   const [filter, setFilter] = React.useState<TestamentFilter>("all")
+  const { t } = useLanguage()
 
   const handleSelectBook = (book: Book) => {
     setSelectedBook(book)
@@ -37,6 +41,15 @@ export default function BibleApp() {
     }
   }
 
+  const handleNavigateFromTimeline = (bookId: string, chapter: number) => {
+    const book = getBook(bookId)
+    if (book) {
+      setSelectedBook(book)
+      setSelectedChapter(chapter)
+      setView("reader")
+    }
+  }
+
   const handleBack = () => {
     if (view === "reader") {
       setView("chapters")
@@ -49,6 +62,11 @@ export default function BibleApp() {
   const handleHome = () => {
     setView("books")
     setSelectedBook(null)
+  }
+
+  // Get translated book name
+  const getBookName = (book: Book) => {
+    return t.books[book.id as keyof typeof t.books] || book.name
   }
 
   return (
@@ -65,32 +83,35 @@ export default function BibleApp() {
                 className="h-9 w-9"
               >
                 <ChevronLeft className="h-5 w-5" />
-                <span className="sr-only">Back</span>
+                <span className="sr-only">{t.back}</span>
               </Button>
             )}
-            
+
             {view === "books" && (
               <div className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5" />
-                <h1 className="text-lg font-semibold">Scripture</h1>
+                <h1 className="text-lg font-semibold">{t.appTitle}</h1>
               </div>
             )}
-            
+
             {view === "chapters" && selectedBook && (
-              <h1 className="text-lg font-semibold">{selectedBook.name}</h1>
+              <h1 className="text-lg font-semibold">{getBookName(selectedBook)}</h1>
             )}
-            
+
             {view === "reader" && selectedBook && (
               <button
                 onClick={() => setView("chapters")}
                 className="text-lg font-semibold hover:underline underline-offset-4"
               >
-                {selectedBook.name} {selectedChapter}
+                {getBookName(selectedBook)} {selectedChapter}
               </button>
             )}
           </div>
 
-          <SettingsSheet />
+          <div className="flex items-center gap-1">
+            <TimelineSheet onNavigate={handleNavigateFromTimeline} />
+            <SettingsSheet />
+          </div>
         </div>
       </header>
 
@@ -105,19 +126,19 @@ export default function BibleApp() {
                 active={filter === "all"}
                 onClick={() => setFilter("all")}
               >
-                All
+                {t.all}
               </FilterButton>
               <FilterButton
                 active={filter === "old"}
                 onClick={() => setFilter("old")}
               >
-                Old Testament
+                {t.oldTestament}
               </FilterButton>
               <FilterButton
                 active={filter === "new"}
                 onClick={() => setFilter("new")}
               >
-                New Testament
+                {t.newTestament}
               </FilterButton>
             </div>
 
@@ -130,7 +151,7 @@ export default function BibleApp() {
           <>
             <div className="px-4 py-6 pb-24">
               <p className="mb-4 text-sm text-muted-foreground">
-                {selectedBook.chapters} chapters
+                {formatString(t.chaptersCount, { count: selectedBook.chapters })}
               </p>
               <ChapterGrid book={selectedBook} onSelectChapter={handleSelectChapter} />
             </div>
@@ -145,8 +166,8 @@ export default function BibleApp() {
                   className="gap-1 text-muted-foreground hover:text-foreground"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  <span className="sm:hidden">Back</span>
-                  <span className="hidden sm:inline">Back</span>
+                  <span className="sm:hidden">{t.back}</span>
+                  <span className="hidden sm:inline">{t.back}</span>
                 </Button>
 
                 <Button
@@ -156,7 +177,7 @@ export default function BibleApp() {
                   className="h-9 w-9 text-muted-foreground hover:text-foreground"
                 >
                   <Home className="h-5 w-5" />
-                  <span className="sr-only">Home</span>
+                  <span className="sr-only">{t.home}</span>
                 </Button>
 
                 <div className="w-[68px]" />
