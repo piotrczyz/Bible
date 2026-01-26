@@ -44,7 +44,7 @@ This project follows an **AI-assisted development model**:
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 - **UI Components:** [shadcn/ui](https://ui.shadcn.com/) (copy-paste components, Radix primitives, MIT license)
 - **State Management:** React Context (built-in, for theme/auth/settings)
-- **Data Persistence:** localStorage (MVP) - backend sync deferred to future
+- **Data Persistence:** localStorage (for settings/preferences)
 - **Mobile Wrapper:** [Capacitor](https://capacitorjs.com/) for iOS and Android
 
 ### Design-to-Code Workflow
@@ -290,6 +290,22 @@ Before submitting code for review:
 | 2026-01-26 | shadcn/ui | Best Figma ecosystem, copy-paste model, Radix primitives (MIT license) | Architect |
 | 2026-01-26 | React Context | Simple global state (theme, auth, settings), no extra dependencies | Architect |
 | 2026-01-26 | localStorage for MVP | Keep it simple, defer backend sync to future iteration | Architect |
+| 2026-01-26 | MVP scope: navigation only | Simple Bible navigation, defer highlights/AI search to future | Architect |
+
+## MVP Scope
+
+### Included (MVP)
+- Bible navigation (books, chapters, verses)
+- Reading view
+- Theme support (light/dark)
+- Basic settings
+
+### Deferred (Future Features)
+- Verse highlights
+- AI-powered verse search
+- Bookmarks
+- Cross-device sync
+- User accounts
 
 ## Environment Setup
 
