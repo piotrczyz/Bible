@@ -8,7 +8,7 @@ import { useReadingHistory } from "@/components/reading-history-provider"
 import { useVerses } from "@/hooks/use-verses"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ChevronLeft, ChevronRight, Home, CheckCheck, Check } from "lucide-react"
+import { ChevronLeft, ChevronRight, Home, CheckCheck, Check, Save } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface VerseReaderProps {
@@ -22,11 +22,12 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
   const { fontSize, versionId, currentVersion } = useSettings()
   const { t } = useLanguage()
   const {
-    readVerses,
+    selectedVerses,
     setChapterContext,
     toggleVerse,
-    markAllRead,
-    markAllUnread,
+    selectAllVerses,
+    clearSelection,
+    saveToTimeline,
   } = useReadingHistory()
   const { verses, isLoading, error } = useVerses(versionId, book.id, chapter)
 
@@ -40,12 +41,19 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
     toggleVerse(verseNumber)
   }
 
-  // Handle mark all toggle
-  const handleMarkAllToggle = () => {
-    if (readVerses.size === verses.length && verses.length > 0) {
-      markAllUnread()
+  // Handle select all toggle
+  const handleSelectAllToggle = () => {
+    if (selectedVerses.size === verses.length && verses.length > 0) {
+      clearSelection()
     } else {
-      markAllRead(verses.length)
+      selectAllVerses(verses.length)
+    }
+  }
+
+  // Handle save to timeline
+  const handleSaveToTimeline = () => {
+    if (selectedVerses.size > 0) {
+      saveToTimeline()
     }
   }
 
@@ -116,7 +124,8 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
     touchStartRef.current = null
   }
 
-  const allRead = readVerses.size === verses.length && verses.length > 0
+  const allSelected = selectedVerses.size === verses.length && verses.length > 0
+  const hasSelection = selectedVerses.size > 0
 
   return (
     <div
@@ -164,7 +173,7 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
           <div className="space-y-4">
             {verses.map((verse, index) => {
               const verseNumber = index + 1
-              const isRead = readVerses.has(verseNumber)
+              const isSelected = selectedVerses.has(verseNumber)
               return (
                 <p
                   key={index}
@@ -175,7 +184,7 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
                     <sup className="text-xs font-sans text-muted-foreground select-none">
                       {verseNumber}
                     </sup>
-                    {isRead && (
+                    {isSelected && (
                       <Check className="inline-block h-3 w-3 text-primary translate-y-[-2px]" />
                     )}
                   </span>
@@ -214,15 +223,32 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleMarkAllToggle}
+              onClick={handleSelectAllToggle}
               className="h-9 w-9 text-muted-foreground hover:text-foreground"
-              title={allRead ? (t.markAllUnread || "Mark all unread") : (t.markAllRead || "Mark all read")}
+              title={allSelected ? (t.clearSelection || "Clear selection") : (t.selectAll || "Select all")}
             >
               <CheckCheck className={cn(
                 "h-5 w-5",
-                allRead && "text-primary"
+                allSelected && "text-primary"
               )} />
-              <span className="sr-only">{t.selectAll || "Mark all"}</span>
+              <span className="sr-only">{t.selectAll || "Select all"}</span>
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSaveToTimeline}
+              disabled={!hasSelection}
+              className={cn(
+                "h-9 w-9",
+                hasSelection
+                  ? "text-primary hover:text-primary hover:bg-primary/10"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+              title={t.saveToTimeline || "Save to timeline"}
+            >
+              <Save className="h-5 w-5" />
+              <span className="sr-only">{t.saveToTimeline || "Save to timeline"}</span>
             </Button>
 
             <Button
