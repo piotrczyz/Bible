@@ -3,16 +3,17 @@
 import { type Book, getVerses, bibleBooks, getBook } from "@/lib/bible-data"
 import { useSettings } from "@/components/settings-provider"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Home } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface VerseReaderProps {
   book: Book
   chapter: number
   onNavigate: (bookId: string, chapter: number) => void
+  onHome: () => void
 }
 
-export function VerseReader({ book, chapter, onNavigate }: VerseReaderProps) {
+export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderProps) {
   const { fontSize, versionId, currentVersion } = useSettings()
   const verses = getVerses(book.id, chapter, versionId)
 
@@ -97,9 +98,15 @@ export function VerseReader({ book, chapter, onNavigate }: VerseReaderProps) {
             <span className="sm:hidden">Prev</span>
           </Button>
 
-          <span className="text-sm font-medium text-muted-foreground">
-            {book.abbrev} {chapter}
-          </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onHome}
+            className="h-9 w-9 text-muted-foreground hover:text-foreground"
+          >
+            <Home className="h-5 w-5" />
+            <span className="sr-only">Home</span>
+          </Button>
 
           <Button
             variant="ghost"
