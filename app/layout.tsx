@@ -8,6 +8,7 @@ import { SettingsProvider } from '@/components/settings-provider'
 import { LanguageProvider } from '@/components/language-provider'
 import { ReadingHistoryProvider } from '@/components/reading-history-provider'
 import { PWARegister } from '@/components/pwa-register'
+import { PWAInstallPrompt } from '@/components/pwa-install-prompt'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -71,6 +72,7 @@ export default function RootLayout({
                 {children}
               </ReadingHistoryProvider>
             </SettingsProvider>
+            <PWAInstallPrompt />
           </LanguageProvider>
         </ThemeProvider>
         <PWARegister />

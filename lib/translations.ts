@@ -23,6 +23,16 @@ export interface Translations {
   prev: string;
   next: string;
 
+  // PWA Install Prompt
+  installApp: string;
+  installDescription: string;
+  install: string;
+  notNow: string;
+  iosInstallTitle: string;
+  iosInstallStep1: string;
+  iosInstallStep2: string;
+  iosInstallStep3: string;
+
   // Testament filters
   all: string;
   oldTestament: string;
@@ -151,6 +161,16 @@ const en: Translations = {
   home: "Home",
   prev: "Prev",
   next: "Next",
+
+  // PWA Install Prompt
+  installApp: "Install Scripture",
+  installDescription: "Install the app for offline reading and a better experience.",
+  install: "Install",
+  notNow: "Not now",
+  iosInstallTitle: "Install on iOS",
+  iosInstallStep1: "Tap the Share button",
+  iosInstallStep2: "Scroll down and tap \"Add to Home Screen\"",
+  iosInstallStep3: "Tap \"Add\" to install",
 
   // Testament filters
   all: "All",
@@ -281,6 +301,16 @@ const pl: Translations = {
   prev: "Poprz.",
   next: "Nast.",
 
+  // PWA Install Prompt
+  installApp: "Zainstaluj Pismo",
+  installDescription: "Zainstaluj aplikację, aby czytać offline i mieć lepsze doświadczenie.",
+  install: "Zainstaluj",
+  notNow: "Nie teraz",
+  iosInstallTitle: "Zainstaluj na iOS",
+  iosInstallStep1: "Dotknij przycisk Udostępnij",
+  iosInstallStep2: "Przewiń w dół i dotknij \"Dodaj do ekranu głównego\"",
+  iosInstallStep3: "Dotknij \"Dodaj\", aby zainstalować",
+
   // Testament filters
   all: "Wszystkie",
   oldTestament: "Stary Testament",
@@ -409,6 +439,16 @@ const no: Translations = {
   home: "Hjem",
   prev: "Forrige",
   next: "Neste",
+
+  // PWA Install Prompt
+  installApp: "Installer Skriften",
+  installDescription: "Installer appen for offline lesing og en bedre opplevelse.",
+  install: "Installer",
+  notNow: "Ikke nå",
+  iosInstallTitle: "Installer på iOS",
+  iosInstallStep1: "Trykk på Del-knappen",
+  iosInstallStep2: "Rull ned og trykk \"Legg til på Hjem-skjerm\"",
+  iosInstallStep3: "Trykk \"Legg til\" for å installere",
 
   // Testament filters
   all: "Alle",
