@@ -4,7 +4,7 @@
  * Data structure is designed for Firebase Firestore compatibility:
  * - ISO 8601 timestamps convert to Firestore Timestamp
  * - UUIDs prevent conflicts when syncing from multiple devices
- * - Chapter-level tracking balances granularity with storage efficiency
+ * - Verse-level tracking for detailed reading analytics
  */
 
 export interface ReadingRecord {
@@ -14,9 +14,11 @@ export interface ReadingRecord {
   bookId: string
   /** Chapter number */
   chapter: number
+  /** Array of verse numbers that were read (1-indexed) */
+  verses: number[]
   /** Bible version used, e.g., "kjv", "asv" */
   versionId: string
-  /** ISO 8601 timestamp when the chapter was read */
+  /** ISO 8601 timestamp when the verses were read */
   timestamp: string
 }
 
@@ -42,12 +44,14 @@ export function generateId(): string {
 export function createReadingRecord(
   bookId: string,
   chapter: number,
+  verses: number[],
   versionId: string
 ): ReadingRecord {
   return {
     id: generateId(),
     bookId,
     chapter,
+    verses: [...verses].sort((a, b) => a - b), // Sort verses in order
     versionId,
     timestamp: new Date().toISOString(),
   }
@@ -107,4 +111,29 @@ export function formatTimeForDisplay(timestamp: string, locale: string = "en"): 
     hour: "2-digit",
     minute: "2-digit",
   })
+}
+
+/**
+ * Format verse numbers as ranges (e.g., [1,2,3,5,7,8,9] -> "1-3, 5, 7-9")
+ */
+export function formatVerseRanges(verses: number[]): string {
+  if (verses.length === 0) return ""
+
+  const sorted = [...verses].sort((a, b) => a - b)
+  const ranges: string[] = []
+  let start = sorted[0]
+  let end = sorted[0]
+
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] === end + 1) {
+      end = sorted[i]
+    } else {
+      ranges.push(start === end ? `${start}` : `${start}-${end}`)
+      start = sorted[i]
+      end = sorted[i]
+    }
+  }
+
+  ranges.push(start === end ? `${start}` : `${start}-${end}`)
+  return ranges.join(", ")
 }

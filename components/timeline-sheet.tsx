@@ -9,6 +9,7 @@ import {
   groupRecordsByDate,
   formatDateForDisplay,
   formatTimeForDisplay,
+  formatVerseRanges,
   type ReadingRecord,
 } from "@/lib/reading-history"
 import { Button } from "@/components/ui/button"
@@ -138,6 +139,9 @@ interface TimelineItemProps {
 
 function TimelineItem({ record, bookName, locale, onClick, clickable }: TimelineItemProps) {
   const version = getBibleVersion(record.versionId)
+  const verseRanges = record.verses && record.verses.length > 0
+    ? formatVerseRanges(record.verses)
+    : null
 
   const content = (
     <div className="flex items-center justify-between gap-2">
@@ -146,10 +150,13 @@ function TimelineItem({ record, bookName, locale, onClick, clickable }: Timeline
         <div className="min-w-0">
           <p className="text-sm font-medium truncate">
             {bookName} {record.chapter}
+            {verseRanges && (
+              <span className="text-muted-foreground font-normal">:{verseRanges}</span>
+            )}
           </p>
           {version && (
             <p className="text-xs text-muted-foreground">
-              {version.abbreviation}
+              {version.abbreviation} · {record.verses?.length || 0} {(record.verses?.length || 0) === 1 ? "verse" : "verses"}
             </p>
           )}
         </div>

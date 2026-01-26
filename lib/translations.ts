@@ -60,6 +60,12 @@ export interface Translations {
   confirmClearHistory: string;
   loading: string;
 
+  // Verse selection
+  verseSelected: string;
+  versesSelected: string;
+  selectAll: string;
+  save: string;
+
   // Bible book names
   books: {
     gen: string;
@@ -178,6 +184,12 @@ const en: Translations = {
   clearHistory: "Clear History",
   confirmClearHistory: "Are you sure you want to clear all reading history?",
   loading: "Loading...",
+
+  // Verse selection
+  verseSelected: "verse",
+  versesSelected: "verses",
+  selectAll: "Select all",
+  save: "Save",
 
   // Bible book names
   books: {
@@ -298,6 +310,12 @@ const pl: Translations = {
   confirmClearHistory: "Czy na pewno chcesz wyczyścić całą historię czytania?",
   loading: "Ładowanie...",
 
+  // Verse selection
+  verseSelected: "werset",
+  versesSelected: "wersetów",
+  selectAll: "Zaznacz wszystko",
+  save: "Zapisz",
+
   // Bible book names
   books: {
     gen: "Księga Rodzaju",
@@ -416,6 +434,12 @@ const no: Translations = {
   clearHistory: "Tøm historikk",
   confirmClearHistory: "Er du sikker på at du vil slette all lesehistorikk?",
   loading: "Laster...",
+
+  // Verse selection
+  verseSelected: "vers",
+  versesSelected: "vers",
+  selectAll: "Velg alle",
+  save: "Lagre",
 
   // Bible book names
   books: {
