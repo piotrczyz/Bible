@@ -5,6 +5,7 @@ import { Lora } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { SettingsProvider } from '@/components/settings-provider'
+import { LanguageProvider } from '@/components/language-provider'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -56,9 +57,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SettingsProvider>
-            {children}
-          </SettingsProvider>
+          <LanguageProvider>
+            <SettingsProvider>
+              {children}
+            </SettingsProvider>
+          </LanguageProvider>
         </ThemeProvider>
         <Analytics />
       </body>
