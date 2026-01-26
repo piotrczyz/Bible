@@ -9,6 +9,11 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
