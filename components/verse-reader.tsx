@@ -8,7 +8,7 @@ import { useReadingHistory } from "@/components/reading-history-provider"
 import { useVerses } from "@/hooks/use-verses"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ChevronLeft, ChevronRight, Home, CheckCheck, Eye } from "lucide-react"
+import { ChevronLeft, ChevronRight, Home, CheckCheck, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface VerseReaderProps {
@@ -176,7 +176,7 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
                       {verseNumber}
                     </sup>
                     {isRead && (
-                      <Eye className="inline-block h-3 w-3 text-primary translate-y-[-2px]" />
+                      <Check className="inline-block h-3 w-3 text-primary translate-y-[-2px]" />
                     )}
                   </span>
                   {verse}
