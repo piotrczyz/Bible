@@ -8,7 +8,7 @@ import { useReadingHistory } from "@/components/reading-history-provider"
 import { useVerses } from "@/hooks/use-verses"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ChevronLeft, ChevronRight, Home, CheckCheck, Check, Save } from "lucide-react"
+import { ChevronLeft, ChevronRight, Home, CheckCheck, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface VerseReaderProps {
@@ -27,7 +27,6 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
     toggleVerse,
     selectAllVerses,
     clearSelection,
-    saveToTimeline,
   } = useReadingHistory()
   const { verses, isLoading, error } = useVerses(versionId, book.id, chapter)
 
@@ -47,13 +46,6 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
       clearSelection()
     } else {
       selectAllVerses(verses.length)
-    }
-  }
-
-  // Handle save to timeline
-  const handleSaveToTimeline = () => {
-    if (selectedVerses.size > 0) {
-      saveToTimeline()
     }
   }
 
@@ -125,7 +117,6 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
   }
 
   const allSelected = selectedVerses.size === verses.length && verses.length > 0
-  const hasSelection = selectedVerses.size > 0
 
   return (
     <div
@@ -232,23 +223,6 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
                 allSelected && "text-primary"
               )} />
               <span className="sr-only">{t.selectAll || "Select all"}</span>
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSaveToTimeline}
-              disabled={!hasSelection}
-              className={cn(
-                "h-9 w-9",
-                hasSelection
-                  ? "text-primary hover:text-primary hover:bg-primary/10"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              title={t.saveToTimeline || "Save to timeline"}
-            >
-              <Save className="h-5 w-5" />
-              <span className="sr-only">{t.saveToTimeline || "Save to timeline"}</span>
             </Button>
 
             <Button

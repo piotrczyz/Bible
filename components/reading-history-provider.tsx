@@ -9,27 +9,19 @@ import {
 const STORAGE_KEY = "bible-reading-history"
 const MAX_RECORDS = 1000 // Limit to prevent excessive storage usage
 
-interface ChapterContext {
-  bookId: string
-  chapter: number
-  versionId: string
-}
-
 interface ReadingHistoryContextType {
   /** All reading records, sorted by timestamp (newest first) */
   records: ReadingRecord[]
   /** Currently selected verses for the active chapter */
   selectedVerses: Set<number>
-  /** Set current chapter context (clears selection) */
+  /** Set current chapter context - creates a new timeline record */
   setChapterContext: (bookId: string, chapter: number, versionId: string) => void
-  /** Toggle a verse selection */
+  /** Toggle a verse selection (auto-saves to current record) */
   toggleVerse: (verse: number) => void
-  /** Select all verses */
+  /** Select all verses (auto-saves to current record) */
   selectAllVerses: (totalVerses: number) => void
-  /** Clear current selection */
+  /** Clear current selection (auto-saves to current record) */
   clearSelection: () => void
-  /** Save current selection as a new timeline entry */
-  saveToTimeline: () => void
   /** Delete a specific reading record */
   deleteRecord: (recordId: string) => void
   /** Clear all reading history */
@@ -45,7 +37,7 @@ const ReadingHistoryContext = React.createContext<ReadingHistoryContextType | un
 export function ReadingHistoryProvider({ children }: { children: React.ReactNode }) {
   const [records, setRecords] = React.useState<ReadingRecord[]>([])
   const [selectedVerses, setSelectedVerses] = React.useState<Set<number>>(new Set())
-  const [currentChapter, setCurrentChapter] = React.useState<ChapterContext | null>(null)
+  const [currentRecordId, setCurrentRecordId] = React.useState<string | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
 
   // Load records from localStorage on mount
@@ -81,16 +73,47 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
     }
   }, [])
 
-  // Set chapter context - always starts with empty selection
+  // Update current record's verses
+  const updateCurrentRecord = React.useCallback((newVerses: Set<number>) => {
+    if (!currentRecordId) return
+
+    setRecords(prev => {
+      const updated = prev.map(record => {
+        if (record.id === currentRecordId) {
+          return { ...record, verses: Array.from(newVerses).sort((a, b) => a - b) }
+        }
+        return record
+      })
+      saveRecords(updated)
+      return updated
+    })
+  }, [currentRecordId, saveRecords])
+
+  // Set chapter context - creates a new timeline record
   const setChapterContext = React.useCallback(
     (bookId: string, chapter: number, versionId: string) => {
-      setCurrentChapter({ bookId, chapter, versionId })
+      // Create a new record for this chapter visit
+      const newRecord = createReadingRecord(bookId, chapter, [], versionId)
+
+      setRecords(prev => {
+        let updated = [newRecord, ...prev]
+
+        // Trim if exceeding max records
+        if (updated.length > MAX_RECORDS) {
+          updated = updated.slice(0, MAX_RECORDS)
+        }
+
+        saveRecords(updated)
+        return updated
+      })
+
+      setCurrentRecordId(newRecord.id)
       setSelectedVerses(new Set())
     },
-    []
+    [saveRecords]
   )
 
-  // Toggle verse selection
+  // Toggle verse selection (auto-saves)
   const toggleVerse = React.useCallback((verse: number) => {
     setSelectedVerses(prev => {
       const newSet = new Set(prev)
@@ -99,46 +122,27 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
       } else {
         newSet.add(verse)
       }
+      updateCurrentRecord(newSet)
       return newSet
     })
-  }, [])
+  }, [updateCurrentRecord])
 
-  // Select all verses
+  // Select all verses (auto-saves)
   const selectAllVerses = React.useCallback((totalVerses: number) => {
     const allVerses = new Set<number>()
     for (let i = 1; i <= totalVerses; i++) {
       allVerses.add(i)
     }
     setSelectedVerses(allVerses)
-  }, [])
+    updateCurrentRecord(allVerses)
+  }, [updateCurrentRecord])
 
-  // Clear selection
+  // Clear selection (auto-saves)
   const clearSelection = React.useCallback(() => {
-    setSelectedVerses(new Set())
-  }, [])
-
-  // Save current selection as a new timeline entry
-  const saveToTimeline = React.useCallback(() => {
-    if (!currentChapter || selectedVerses.size === 0) return
-
-    const { bookId, chapter, versionId } = currentChapter
-    const newRecord = createReadingRecord(bookId, chapter, Array.from(selectedVerses), versionId)
-
-    setRecords(prev => {
-      let updated = [newRecord, ...prev]
-
-      // Trim if exceeding max records
-      if (updated.length > MAX_RECORDS) {
-        updated = updated.slice(0, MAX_RECORDS)
-      }
-
-      saveRecords(updated)
-      return updated
-    })
-
-    // Clear selection after saving
-    setSelectedVerses(new Set())
-  }, [currentChapter, selectedVerses, saveRecords])
+    const emptySet = new Set<number>()
+    setSelectedVerses(emptySet)
+    updateCurrentRecord(emptySet)
+  }, [updateCurrentRecord])
 
   // Delete a specific record
   const deleteRecord = React.useCallback(
@@ -148,14 +152,20 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
         saveRecords(updated)
         return updated
       })
+      // If deleting current record, clear selection
+      if (recordId === currentRecordId) {
+        setCurrentRecordId(null)
+        setSelectedVerses(new Set())
+      }
     },
-    [saveRecords]
+    [saveRecords, currentRecordId]
   )
 
   // Clear all history
   const clearHistory = React.useCallback(() => {
     setRecords([])
     setSelectedVerses(new Set())
+    setCurrentRecordId(null)
     try {
       localStorage.removeItem(STORAGE_KEY)
     } catch (error) {
@@ -172,7 +182,6 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
         toggleVerse,
         selectAllVerses,
         clearSelection,
-        saveToTimeline,
         deleteRecord,
         clearHistory,
         isLoading,
