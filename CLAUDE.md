@@ -523,7 +523,6 @@ Before submitting code for review:
 | 2026-01-26 | Figma Make for UI | Design-to-code workflow, generates Tailwind-compatible React | Architect |
 | 2026-01-26 | shadcn/ui | Best Figma ecosystem, copy-paste model, Radix primitives (MIT license) | Architect |
 | 2026-01-26 | React Context | Simple global state (theme, auth, settings), no extra dependencies | Architect |
-| 2026-01-26 | localStorage for MVP | Keep it simple, defer backend sync to future iteration | Architect |
 | 2026-01-26 | MVP scope: navigation only | Simple Bible navigation, defer highlights/AI search to future | Architect |
 | 2026-01-26 | Offline-first architecture | App must work fully offline; sync when connected | Architect |
 | 2026-01-26 | IndexedDB via Dexie.js | Robust local storage for offline data (Apache 2.0 license) | Architect |
