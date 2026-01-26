@@ -42,7 +42,9 @@ This project follows an **AI-assisted development model**:
 - **Framework:** [Next.js](https://nextjs.org/) with React
 - **Language:** TypeScript (strict mode)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-- **UI Components:** TBD - must be Tailwind-based (e.g., shadcn/ui, Radix UI, Headless UI)
+- **UI Components:** [shadcn/ui](https://ui.shadcn.com/) (copy-paste components, Radix primitives, MIT license)
+- **State Management:** React Context (built-in, for theme/auth/settings)
+- **Data Persistence:** localStorage (MVP) - backend sync deferred to future
 - **Mobile Wrapper:** [Capacitor](https://capacitorjs.com/) for iOS and Android
 
 ### Design-to-Code Workflow
@@ -285,7 +287,9 @@ Before submitting code for review:
 | 2026-01-26 | Next.js with React | Modern React framework with SSR/SSG capabilities (MIT license) | Architect |
 | 2026-01-26 | Tailwind CSS | Best Figma-to-code compatibility, utility-first approach (MIT license) | Architect |
 | 2026-01-26 | Figma Make for UI | Design-to-code workflow, generates Tailwind-compatible React | Architect |
-| TBD | UI Component Library | Must be Tailwind-based and MIT licensed (shadcn/ui, Radix, Headless UI) | Architect |
+| 2026-01-26 | shadcn/ui | Best Figma ecosystem, copy-paste model, Radix primitives (MIT license) | Architect |
+| 2026-01-26 | React Context | Simple global state (theme, auth, settings), no extra dependencies | Architect |
+| 2026-01-26 | localStorage for MVP | Keep it simple, defer backend sync to future iteration | Architect |
 
 ## Environment Setup
 
@@ -340,16 +344,23 @@ npx cap open android
 | `@capacitor/ios` | iOS platform | Decided |
 | `@capacitor/android` | Android platform | Decided |
 
-### Pending Decisions
+### Additional Dependencies
 
-All options below are open source with MIT license:
+| Package | Purpose | Status |
+|---------|---------|--------|
+| `@radix-ui/*` | Accessible primitives (via shadcn/ui) | Decided |
+| `class-variance-authority` | Component variants (shadcn/ui) | Decided |
+| `clsx`, `tailwind-merge` | Class utilities (shadcn/ui) | Decided |
 
-| Category | Options | Status |
-|----------|---------|--------|
-| UI Components | shadcn/ui (MIT), Radix UI (MIT), Headless UI (MIT) | TBD by Architect |
-| State Management | Zustand (MIT), Jotai (MIT), React Context (built-in) | TBD by Architect |
-| Data Fetching | TanStack Query (MIT), SWR (MIT) | TBD by Architect |
-| Form Handling | React Hook Form (MIT), Formik (Apache 2.0) | TBD by Architect |
+### Deferred Decisions
+
+*To be decided when needed:*
+
+| Category | Options | Notes |
+|----------|---------|-------|
+| Data Fetching | TanStack Query (MIT), SWR (MIT) | When backend sync is added |
+| Form Handling | React Hook Form (MIT) | When complex forms are needed |
+| Backend/Auth | TBD | When cross-device sync is implemented |
 
 ## Troubleshooting
 
@@ -383,10 +394,11 @@ All options below are open source with MIT license:
 - [Figma Make](https://www.figma.com/make/)
 - [Builder.io Visual Copilot](https://www.builder.io/)
 
-### UI Component Libraries (for reference)
-- [shadcn/ui](https://ui.shadcn.com/)
-- [Radix UI](https://www.radix-ui.com/)
-- [Headless UI](https://headlessui.com/)
+### UI Components (shadcn/ui)
+- [shadcn/ui Documentation](https://ui.shadcn.com/)
+- [shadcn/ui Components](https://ui.shadcn.com/docs/components)
+- [shadcn/ui Figma Resources](https://ui.shadcn.com/docs/figma)
+- [Radix UI Primitives](https://www.radix-ui.com/) (underlying library)
 
 ---
 
