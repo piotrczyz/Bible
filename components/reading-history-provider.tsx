@@ -22,6 +22,8 @@ interface ReadingHistoryContextType {
   selectAllVerses: (totalVerses: number) => void
   /** Clear current selection (auto-saves to current record) */
   clearSelection: () => void
+  /** Reset selection UI without saving (for fresh starts) */
+  resetSelection: () => void
   /** Delete a specific reading record */
   deleteRecord: (recordId: string) => void
   /** Clear all reading history */
@@ -137,12 +139,17 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
     updateCurrentRecord(allVerses)
   }, [updateCurrentRecord])
 
-  // Clear selection (auto-saves)
+  // Clear selection (auto-saves to record)
   const clearSelection = React.useCallback(() => {
     const emptySet = new Set<number>()
     setSelectedVerses(emptySet)
     updateCurrentRecord(emptySet)
   }, [updateCurrentRecord])
+
+  // Reset selection UI without saving (for fresh starts on mount)
+  const resetSelection = React.useCallback(() => {
+    setSelectedVerses(new Set())
+  }, [])
 
   // Delete a specific record
   const deleteRecord = React.useCallback(
@@ -182,6 +189,7 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
         toggleVerse,
         selectAllVerses,
         clearSelection,
+        resetSelection,
         deleteRecord,
         clearHistory,
         isLoading,

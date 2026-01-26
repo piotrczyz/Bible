@@ -27,10 +27,20 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
     toggleVerse,
     selectAllVerses,
     clearSelection,
+    resetSelection,
   } = useReadingHistory()
   const { verses, isLoading, error } = useVerses(versionId, book.id, chapter)
 
-  // Set chapter context when entering a chapter (loads existing read verses)
+  // Clear selection on mount (fresh start for every chapter visit)
+  const hasInitialized = useRef(false)
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      resetSelection()
+      hasInitialized.current = true
+    }
+  }, [resetSelection])
+
+  // Set chapter context when chapter changes (creates new timeline record)
   useEffect(() => {
     setChapterContext(book.id, chapter, versionId)
   }, [book.id, chapter, versionId, setChapterContext])
