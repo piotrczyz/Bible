@@ -1,5 +1,6 @@
 "use client"
 
+import { useRef } from "react"
 import { type Book, getVerses, bibleBooks, getBook } from "@/lib/bible-data"
 import { useSettings } from "@/components/settings-provider"
 import { Button } from "@/components/ui/button"
@@ -48,8 +49,43 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
   const prevBook = prev ? getBook(prev.bookId) : null
   const nextBook = next ? getBook(next.bookId) : null
 
+  // Swipe gesture handling
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null)
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    }
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return
+
+    const deltaX = e.changedTouches[0].clientX - touchStartRef.current.x
+    const deltaY = e.changedTouches[0].clientY - touchStartRef.current.y
+    const swipeThreshold = 50
+
+    // Only navigate if horizontal swipe is dominant (not scrolling)
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
+      if (deltaX < 0 && next) {
+        // Swipe left = next chapter
+        onNavigate(next.bookId, next.chapter)
+      } else if (deltaX > 0 && prev) {
+        // Swipe right = previous chapter
+        onNavigate(prev.bookId, prev.chapter)
+      }
+    }
+
+    touchStartRef.current = null
+  }
+
   return (
-    <div className="flex flex-col">
+    <div
+      className="flex flex-col"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <article
         className="prose prose-neutral dark:prose-invert mx-auto max-w-2xl px-4 pb-24 pt-6"
         style={{ fontSize: `${fontSize}px` }}
