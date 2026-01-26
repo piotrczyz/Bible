@@ -8,7 +8,7 @@ import { useReadingHistory } from "@/components/reading-history-provider"
 import { useVerses } from "@/hooks/use-verses"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ChevronLeft, ChevronRight, Home, Check, CheckCheck } from "lucide-react"
+import { ChevronLeft, ChevronRight, Home, CheckCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface VerseReaderProps {
@@ -22,37 +22,30 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
   const { fontSize, versionId, currentVersion } = useSettings()
   const { t } = useLanguage()
   const {
-    selectedVerses,
+    readVerses,
+    setChapterContext,
     toggleVerse,
-    selectAllVerses,
-    clearSelection,
-    saveReadingRecord,
+    markAllRead,
+    markAllUnread,
   } = useReadingHistory()
   const { verses, isLoading, error } = useVerses(versionId, book.id, chapter)
 
-  // Clear selection when navigating to a different chapter
+  // Set chapter context when entering a chapter (loads existing read verses)
   useEffect(() => {
-    clearSelection()
-  }, [book.id, chapter, clearSelection])
+    setChapterContext(book.id, chapter, versionId)
+  }, [book.id, chapter, versionId, setChapterContext])
 
-  // Handle verse click
+  // Handle verse click - toggle read status
   const handleVerseClick = (verseNumber: number) => {
     toggleVerse(verseNumber)
   }
 
-  // Handle save reading
-  const handleSaveReading = () => {
-    if (selectedVerses.size > 0) {
-      saveReadingRecord(book.id, chapter, versionId)
-    }
-  }
-
-  // Handle select all
-  const handleSelectAll = () => {
-    if (selectedVerses.size === verses.length) {
-      clearSelection()
+  // Handle mark all toggle
+  const handleMarkAllToggle = () => {
+    if (readVerses.size === verses.length && verses.length > 0) {
+      markAllUnread()
     } else {
-      selectAllVerses(verses.length)
+      markAllRead(verses.length)
     }
   }
 
@@ -123,6 +116,8 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
     touchStartRef.current = null
   }
 
+  const allRead = readVerses.size === verses.length && verses.length > 0
+
   return (
     <div
       className="flex flex-col"
@@ -164,26 +159,27 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
           </div>
         )}
 
-        {/* Verses */}
+        {/* Verses with dimming effect */}
         {!isLoading && !error && (
           <div className="space-y-4">
             {verses.map((verse, index) => {
               const verseNumber = index + 1
-              const isSelected = selectedVerses.has(verseNumber)
+              const isRead = readVerses.has(verseNumber)
               return (
                 <p
                   key={index}
                   onClick={() => handleVerseClick(verseNumber)}
                   className={cn(
-                    "font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-colors",
-                    isSelected
-                      ? "bg-primary/20 dark:bg-primary/30"
-                      : "hover:bg-secondary/50 active:bg-secondary"
+                    "font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-all duration-200",
+                    "hover:bg-secondary/30 active:bg-secondary/50",
+                    isRead
+                      ? "opacity-100"
+                      : "opacity-50"
                   )}
                 >
                   <sup className={cn(
-                    "mr-1 text-xs font-sans select-none",
-                    isSelected ? "text-primary font-semibold" : "text-muted-foreground"
+                    "mr-1 text-xs font-sans select-none transition-colors",
+                    isRead ? "text-primary font-semibold" : "text-muted-foreground"
                   )}>
                     {verseNumber}
                   </sup>
@@ -194,26 +190,6 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
           </div>
         )}
       </article>
-
-      {/* Selection Actions Bar */}
-      {selectedVerses.size > 0 && (
-        <div className="fixed bottom-16 left-0 right-0 flex justify-center px-4 pointer-events-none">
-          <div className="flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-4 py-2 shadow-lg pointer-events-auto">
-            <span className="text-sm font-medium">
-              {selectedVerses.size} {selectedVerses.size === 1 ? (t.verseSelected || "verse") : (t.versesSelected || "verses")}
-            </span>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleSaveReading}
-              className="h-7 gap-1"
-            >
-              <Check className="h-3 w-3" />
-              {t.save || "Save"}
-            </Button>
-          </div>
-        </div>
-      )}
 
       {/* Chapter Navigation */}
       <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80">
@@ -242,15 +218,15 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleSelectAll}
+              onClick={handleMarkAllToggle}
               className="h-9 w-9 text-muted-foreground hover:text-foreground"
-              title={t.selectAll || "Select all"}
+              title={allRead ? (t.markAllUnread || "Mark all unread") : (t.markAllRead || "Mark all read")}
             >
               <CheckCheck className={cn(
                 "h-5 w-5",
-                selectedVerses.size === verses.length && verses.length > 0 && "text-primary"
+                allRead && "text-primary"
               )} />
-              <span className="sr-only">{t.selectAll || "Select all"}</span>
+              <span className="sr-only">{t.selectAll || "Mark all"}</span>
             </Button>
 
             <Button

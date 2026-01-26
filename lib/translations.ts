@@ -64,6 +64,8 @@ export interface Translations {
   verseSelected: string;
   versesSelected: string;
   selectAll: string;
+  markAllRead: string;
+  markAllUnread: string;
   save: string;
 
   // Bible book names
@@ -189,6 +191,8 @@ const en: Translations = {
   verseSelected: "verse",
   versesSelected: "verses",
   selectAll: "Select all",
+  markAllRead: "Mark all read",
+  markAllUnread: "Mark all unread",
   save: "Save",
 
   // Bible book names
@@ -314,6 +318,8 @@ const pl: Translations = {
   verseSelected: "werset",
   versesSelected: "wersetów",
   selectAll: "Zaznacz wszystko",
+  markAllRead: "Oznacz wszystko jako przeczytane",
+  markAllUnread: "Oznacz wszystko jako nieprzeczytane",
   save: "Zapisz",
 
   // Bible book names
@@ -439,6 +445,8 @@ const no: Translations = {
   verseSelected: "vers",
   versesSelected: "vers",
   selectAll: "Velg alle",
+  markAllRead: "Merk alle som lest",
+  markAllUnread: "Merk alle som ulest",
   save: "Lagre",
 
   // Bible book names
