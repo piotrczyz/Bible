@@ -1,6 +1,6 @@
 "use client"
 
-import { type Book, getSampleVerses, bibleBooks, getBook } from "@/lib/bible-data"
+import { type Book, getVerses, bibleBooks, getBook } from "@/lib/bible-data"
 import { useSettings } from "@/components/settings-provider"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
@@ -13,8 +13,8 @@ interface VerseReaderProps {
 }
 
 export function VerseReader({ book, chapter, onNavigate }: VerseReaderProps) {
-  const { fontSize } = useSettings()
-  const verses = getSampleVerses(book.id, chapter)
+  const { fontSize, versionId, currentVersion } = useSettings()
+  const verses = getVerses(book.id, chapter, versionId)
 
   const getPreviousChapter = () => {
     if (chapter > 1) {
@@ -53,6 +53,15 @@ export function VerseReader({ book, chapter, onNavigate }: VerseReaderProps) {
         className="prose prose-neutral dark:prose-invert mx-auto max-w-2xl px-4 pb-24 pt-6"
         style={{ fontSize: `${fontSize}px` }}
       >
+        {/* Version indicator */}
+        {currentVersion && (
+          <div className="mb-4 text-center">
+            <span className="text-xs font-medium text-muted-foreground bg-secondary/50 px-2 py-1 rounded">
+              {currentVersion.abbreviation}
+            </span>
+          </div>
+        )}
+
         <div className="space-y-4">
           {verses.map((verse, index) => (
             <p key={index} className="font-serif leading-relaxed">
@@ -80,7 +89,7 @@ export function VerseReader({ book, chapter, onNavigate }: VerseReaderProps) {
           >
             <ChevronLeft className="h-4 w-4" />
             <span className="hidden sm:inline">
-              {prevBook?.id === book.id 
+              {prevBook?.id === book.id
                 ? `Chapter ${prev?.chapter}`
                 : `${prevBook?.abbrev} ${prev?.chapter}`
               }
@@ -103,7 +112,7 @@ export function VerseReader({ book, chapter, onNavigate }: VerseReaderProps) {
             )}
           >
             <span className="hidden sm:inline">
-              {nextBook?.id === book.id 
+              {nextBook?.id === book.id
                 ? `Chapter ${next?.chapter}`
                 : `${nextBook?.abbrev} ${next?.chapter}`
               }

@@ -12,13 +12,24 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
-import { Settings, Sun, Moon, Monitor } from "lucide-react"
+import { Settings, Sun, Moon, Monitor, Book } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getAvailableLanguages } from "@/lib/bible-versions"
 
 export function SettingsSheet() {
   const { theme, setTheme } = useTheme()
-  const { fontSize, setFontSize } = useSettings()
+  const { fontSize, setFontSize, versionId, setVersionId, currentVersion } = useSettings()
+  const languages = getAvailableLanguages()
 
   return (
     <Sheet>
@@ -34,6 +45,39 @@ export function SettingsSheet() {
         </SheetHeader>
 
         <div className="mt-8 space-y-8">
+          {/* Bible Version Selection */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <Book className="h-4 w-4" />
+              Bible Version
+            </label>
+            <Select value={versionId} onValueChange={setVersionId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a version" />
+              </SelectTrigger>
+              <SelectContent>
+                {languages.map((lang) => (
+                  <SelectGroup key={lang.code}>
+                    <SelectLabel>{lang.name}</SelectLabel>
+                    {lang.versions.map((version) => (
+                      <SelectItem key={version.id} value={version.id}>
+                        <span className="font-medium">{version.abbreviation}</span>
+                        <span className="text-muted-foreground ml-2">
+                          {version.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                ))}
+              </SelectContent>
+            </Select>
+            {currentVersion && (
+              <p className="text-xs text-muted-foreground">
+                {currentVersion.description}
+              </p>
+            )}
+          </div>
+
           {/* Theme Selection */}
           <div className="space-y-3">
             <label className="text-sm font-medium">Theme</label>
@@ -97,7 +141,7 @@ export function SettingsSheet() {
           <div className="space-y-3 border-t border-border pt-6">
             <h3 className="text-sm font-medium">About</h3>
             <p className="text-sm text-muted-foreground">
-              Scripture is a minimal, open source Bible reading app focused on 
+              Scripture is a minimal, open source Bible reading app focused on
               clean reading experience and easy navigation.
             </p>
             <p className="text-xs text-muted-foreground">
