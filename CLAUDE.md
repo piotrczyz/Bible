@@ -70,24 +70,33 @@ Bible/
 ├── components.json        # shadcn/ui configuration
 ├── app/                   # Next.js App Router
 │   ├── layout.tsx         # Root layout with providers
-│   ├── page.tsx           # Home page (main app)
+│   ├── page.tsx           # Home page (book/chapter/reader views)
 │   └── globals.css        # Global styles
 ├── components/            # React components
 │   ├── ui/                # shadcn/ui primitives
 │   ├── book-list.tsx      # Book selection grid
-│   ├── chapter-grid.tsx   # Chapter selection
-│   ├── verse-reader.tsx   # Verse reading view
+│   ├── chapter-grid.tsx   # Chapter selection grid
+│   ├── verse-reader.tsx   # Verse display with navigation
 │   ├── settings-sheet.tsx # Settings panel
-│   ├── settings-provider.tsx  # Settings context
-│   └── theme-provider.tsx # Theme context
-├── lib/                   # Utilities and data
-│   ├── bible-data.ts      # Bible books and verses
-│   └── utils.ts           # Utility functions
+│   ├── timeline-sheet.tsx # Reading history timeline
+│   ├── theme-provider.tsx # Theme context (light/dark/system)
+│   ├── language-provider.tsx    # Language/i18n context
+│   ├── settings-provider.tsx    # Settings context (font, version)
+│   └── reading-history-provider.tsx # Reading analytics context
+├── lib/                   # Shared utilities and helpers
+│   ├── bible-data.ts      # Book metadata (66 books)
+│   ├── bible-loader.ts    # Verse loading with caching
+│   ├── bible-versions.ts  # Bible version definitions
+│   ├── translations.ts    # i18n (English, Polish, Norwegian)
+│   ├── reading-history.ts # Reading analytics types/utilities
+│   └── utils.ts           # Tailwind utilities
 ├── hooks/                 # Custom React hooks
-├── styles/                # Additional styles
+│   └── use-verses.ts      # Async verse loading hook
 ├── public/                # Static assets
-├── ios/                   # iOS native project (Capacitor, future)
-└── android/               # Android native project (Capacitor, future)
+│   └── bibles/            # Bible JSON files (KJV, ASV, WEB, BG, UBG)
+├── ios/                   # iOS native project (Capacitor-generated)
+├── android/               # Android native project (Capacitor-generated)
+└── __tests__/             # Test files
 ```
 
 ## Development Workflow
@@ -229,10 +238,30 @@ All user data is stored in IndexedDB for offline access:
 | `userHighlights` | Verse highlights and colors | High - sync immediately |
 | `userBookmarks` | Bookmarked verses | High - sync immediately |
 | `userNotes` | Personal notes on verses | High - sync immediately |
-| `readingProgress` | Last read position, history | Medium - sync periodically |
-| `settings` | User preferences (theme, font size) | Low - sync on change |
+| `readingHistory` | Chapter read timestamps for timeline | Medium - sync periodically |
+| `readingProgress` | Last read position | Medium - sync periodically |
+| `settings` | User preferences (theme, font size, language) | Low - sync on change |
 | `syncQueue` | Pending changes to sync | Internal use |
 | `syncMetadata` | Last sync timestamps, versions | Internal use |
+
+#### Reading History Data Structure
+
+The `readingHistory` store tracks chapters read for the timeline feature. Designed for Firebase Firestore compatibility:
+
+```typescript
+interface ReadingRecord {
+  id: string;           // UUID v4 for sync conflict resolution
+  bookId: string;       // e.g., "gen", "mat"
+  chapter: number;      // Chapter number
+  versionId: string;    // Bible version used
+  timestamp: string;    // ISO 8601: "2026-01-26T10:30:00.000Z"
+}
+```
+
+- **UUID IDs** prevent conflicts when syncing from multiple devices
+- **ISO 8601 timestamps** convert directly to Firestore Timestamp
+- **Chapter-level tracking** balances granularity with storage efficiency
+- **Max 1000 records** stored to prevent excessive storage usage
 
 #### Data Schema Pattern
 
@@ -358,7 +387,26 @@ src/
 │   └── useOfflineData.ts       # Data access with offline support
 ```
 
-#### React Context for Sync State
+#### React Context Providers
+
+The app uses multiple React Context providers for state management:
+
+```
+ThemeProvider (next-themes)
+└── LanguageProvider (language, translations)
+    └── SettingsProvider (fontSize, versionId)
+        └── ReadingHistoryProvider (reading analytics)
+            └── App
+```
+
+| Provider | Hook | Purpose |
+|----------|------|---------|
+| `ThemeProvider` | `useTheme()` | Light/dark/system theme |
+| `LanguageProvider` | `useLanguage()` | UI language, translations |
+| `SettingsProvider` | `useSettings()` | Font size, Bible version |
+| `ReadingHistoryProvider` | `useReadingHistory()` | Reading analytics, timeline |
+
+#### Future: React Context for Sync State
 
 ```typescript
 interface SyncContextValue {
@@ -541,6 +589,8 @@ Before submitting code for review:
 | 2026-01-26 | IndexedDB via Dexie.js | Robust local storage for offline data (Apache 2.0 license) | Architect |
 | 2026-01-26 | Last-write-wins conflict resolution | Simple, predictable conflict handling for user data | Architect |
 | 2026-01-26 | Background sync with retry | Automatic sync with exponential backoff on failure | Architect |
+| 2026-01-26 | Reading history with timestamps | Track chapter reads for analytics and future Firebase sync | Architect |
+| 2026-01-26 | UUID + ISO 8601 for reading records | Firebase-compatible data structure, conflict-free sync | Architect |
 
 ## MVP Scope
 
@@ -549,8 +599,11 @@ Before submitting code for review:
 - Reading view
 - Theme support (light/dark)
 - Basic settings
+- Multi-language support (English, Polish, Norwegian)
+- Multiple Bible versions (KJV, ASV, WEB, BG, UBG)
+- **Reading history timeline** (tracks chapters read with timestamps)
 - **Offline support** (app works without network)
-- **Local data persistence** (IndexedDB)
+- **Local data persistence** (IndexedDB via Dexie.js)
 - **Background sync** (when connected)
 
 ### Deferred (Future Features)
@@ -558,6 +611,7 @@ Before submitting code for review:
 - AI-powered verse search
 - Bookmarks
 - User accounts
+- Firebase sync for reading history
 - End-to-end encryption for synced data
 - Manual conflict resolution UI
 
@@ -683,3 +737,4 @@ npx cap open android
 ---
 
 *Last updated: 2026-01-26*
+*Reading history/timeline feature added: 2026-01-26*

@@ -53,6 +53,21 @@ export interface Translations {
   // Errors
   errorTryAgain: string;
 
+  // Timeline
+  timeline: string;
+  noReadingHistory: string;
+  clearHistory: string;
+  confirmClearHistory: string;
+  loading: string;
+
+  // Verse selection
+  verseSelected: string;
+  versesSelected: string;
+  selectAll: string;
+  markAllRead: string;
+  markAllUnread: string;
+  save: string;
+
   // Bible book names
   books: {
     gen: string;
@@ -164,6 +179,21 @@ const en: Translations = {
 
   // Errors
   errorTryAgain: "Please try again or select a different version.",
+
+  // Timeline
+  timeline: "Reading Timeline",
+  noReadingHistory: "No reading history yet. Start reading to see your timeline here.",
+  clearHistory: "Clear History",
+  confirmClearHistory: "Are you sure you want to clear all reading history?",
+  loading: "Loading...",
+
+  // Verse selection
+  verseSelected: "verse",
+  versesSelected: "verses",
+  selectAll: "Select all",
+  markAllRead: "Mark all read",
+  markAllUnread: "Mark all unread",
+  save: "Save",
 
   // Bible book names
   books: {
@@ -277,6 +307,21 @@ const pl: Translations = {
   // Errors
   errorTryAgain: "Spróbuj ponownie lub wybierz inny przekład.",
 
+  // Timeline
+  timeline: "Historia czytania",
+  noReadingHistory: "Brak historii czytania. Zacznij czytać, aby zobaczyć swoją oś czasu.",
+  clearHistory: "Wyczyść historię",
+  confirmClearHistory: "Czy na pewno chcesz wyczyścić całą historię czytania?",
+  loading: "Ładowanie...",
+
+  // Verse selection
+  verseSelected: "werset",
+  versesSelected: "wersetów",
+  selectAll: "Zaznacz wszystko",
+  markAllRead: "Oznacz wszystko jako przeczytane",
+  markAllUnread: "Oznacz wszystko jako nieprzeczytane",
+  save: "Zapisz",
+
   // Bible book names
   books: {
     gen: "Księga Rodzaju",
@@ -388,6 +433,21 @@ const no: Translations = {
 
   // Errors
   errorTryAgain: "Vennligst prøv igjen eller velg en annen oversettelse.",
+
+  // Timeline
+  timeline: "Lesetidslinje",
+  noReadingHistory: "Ingen lesehistorikk ennå. Begynn å lese for å se tidslinjen din her.",
+  clearHistory: "Tøm historikk",
+  confirmClearHistory: "Er du sikker på at du vil slette all lesehistorikk?",
+  loading: "Laster...",
+
+  // Verse selection
+  verseSelected: "vers",
+  versesSelected: "vers",
+  selectAll: "Velg alle",
+  markAllRead: "Merk alle som lest",
+  markAllUnread: "Merk alle som ulest",
+  save: "Lagre",
 
   // Bible book names
   books: {
