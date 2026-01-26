@@ -70,6 +70,20 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
     }
   }, [])
 
+  // Re-apply read verses when records load and we have a current chapter
+  React.useEffect(() => {
+    if (!isLoading && currentChapter) {
+      const existingRecord = records.find(
+        r => r.bookId === currentChapter.bookId &&
+             r.chapter === currentChapter.chapter &&
+             r.versionId === currentChapter.versionId
+      )
+      if (existingRecord) {
+        setReadVerses(new Set(existingRecord.verses))
+      }
+    }
+  }, [isLoading, records, currentChapter])
+
   // Save records to localStorage
   const saveRecords = React.useCallback((newRecords: ReadingRecord[]) => {
     try {
