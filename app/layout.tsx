@@ -6,6 +6,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { SettingsProvider } from '@/components/settings-provider'
 import { LanguageProvider } from '@/components/language-provider'
+import { ReadingHistoryProvider } from '@/components/reading-history-provider'
 import { PWARegister } from '@/components/pwa-register'
 import './globals.css'
 
@@ -66,7 +67,9 @@ export default function RootLayout({
         >
           <LanguageProvider>
             <SettingsProvider>
-              {children}
+              <ReadingHistoryProvider>
+                {children}
+              </ReadingHistoryProvider>
             </SettingsProvider>
           </LanguageProvider>
         </ThemeProvider>

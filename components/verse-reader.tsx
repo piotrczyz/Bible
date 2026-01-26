@@ -1,13 +1,14 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useEffect } from "react"
 import { type Book, bibleBooks, getBook } from "@/lib/bible-data"
 import { useSettings } from "@/components/settings-provider"
 import { useLanguage } from "@/components/language-provider"
+import { useReadingHistory } from "@/components/reading-history-provider"
 import { useVerses } from "@/hooks/use-verses"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ChevronLeft, ChevronRight, Home } from "lucide-react"
+import { ChevronLeft, ChevronRight, Home, CheckCheck, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface VerseReaderProps {
@@ -20,7 +21,43 @@ interface VerseReaderProps {
 export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderProps) {
   const { fontSize, versionId, currentVersion } = useSettings()
   const { t } = useLanguage()
+  const {
+    selectedVerses,
+    setChapterContext,
+    toggleVerse,
+    selectAllVerses,
+    clearSelection,
+    resetSelection,
+  } = useReadingHistory()
   const { verses, isLoading, error } = useVerses(versionId, book.id, chapter)
+
+  // Clear selection on mount (fresh start for every chapter visit)
+  const hasInitialized = useRef(false)
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      resetSelection()
+      hasInitialized.current = true
+    }
+  }, [resetSelection])
+
+  // Set chapter context when chapter changes (creates new timeline record)
+  useEffect(() => {
+    setChapterContext(book.id, chapter, versionId)
+  }, [book.id, chapter, versionId, setChapterContext])
+
+  // Handle verse click - toggle read status
+  const handleVerseClick = (verseNumber: number) => {
+    toggleVerse(verseNumber)
+  }
+
+  // Handle select all toggle
+  const handleSelectAllToggle = () => {
+    if (selectedVerses.size === verses.length && verses.length > 0) {
+      clearSelection()
+    } else {
+      selectAllVerses(verses.length)
+    }
+  }
 
   // Get translated book name
   const getBookName = (b: Book) => {
@@ -89,6 +126,8 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
     touchStartRef.current = null
   }
 
+  const allSelected = selectedVerses.size === verses.length && verses.length > 0
+
   return (
     <div
       className="flex flex-col"
@@ -130,17 +169,30 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
           </div>
         )}
 
-        {/* Verses */}
+        {/* Verses with eye icon for read status */}
         {!isLoading && !error && (
           <div className="space-y-4">
-            {verses.map((verse, index) => (
-              <p key={index} className="font-serif leading-relaxed">
-                <sup className="mr-1 text-xs font-sans text-muted-foreground select-none">
-                  {index + 1}
-                </sup>
-                {verse}
-              </p>
-            ))}
+            {verses.map((verse, index) => {
+              const verseNumber = index + 1
+              const isSelected = selectedVerses.has(verseNumber)
+              return (
+                <p
+                  key={index}
+                  onClick={() => handleVerseClick(verseNumber)}
+                  className="font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-colors hover:bg-secondary/30 active:bg-secondary/50"
+                >
+                  <span className="inline-flex items-baseline gap-1 mr-1">
+                    <sup className="text-xs font-sans text-muted-foreground select-none">
+                      {verseNumber}
+                    </sup>
+                    {isSelected && (
+                      <Check className="inline-block h-3 w-3 text-primary translate-y-[-2px]" />
+                    )}
+                  </span>
+                  {verse}
+                </p>
+              )
+            })}
           </div>
         )}
       </article>
@@ -168,15 +220,31 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
             <span className="sm:hidden">{t.prev}</span>
           </Button>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onHome}
-            className="h-9 w-9 text-muted-foreground hover:text-foreground"
-          >
-            <Home className="h-5 w-5" />
-            <span className="sr-only">{t.home}</span>
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSelectAllToggle}
+              className="h-9 w-9 text-muted-foreground hover:text-foreground"
+              title={allSelected ? (t.clearSelection || "Clear selection") : (t.selectAll || "Select all")}
+            >
+              <CheckCheck className={cn(
+                "h-5 w-5",
+                allSelected && "text-primary"
+              )} />
+              <span className="sr-only">{t.selectAll || "Select all"}</span>
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onHome}
+              className="h-9 w-9 text-muted-foreground hover:text-foreground"
+            >
+              <Home className="h-5 w-5" />
+              <span className="sr-only">{t.home}</span>
+            </Button>
+          </div>
 
           <Button
             variant="ghost"
