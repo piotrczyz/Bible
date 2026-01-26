@@ -4,6 +4,7 @@ import React from "react"
 
 import { useTheme } from "next-themes"
 import { useSettings } from "@/components/settings-provider"
+import { useLanguage } from "@/components/language-provider"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -22,41 +23,62 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
-import { Settings, Sun, Moon, Monitor, Book } from "lucide-react"
+import { Settings, Sun, Moon, Monitor, Book, Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getAvailableLanguages } from "@/lib/bible-versions"
 
 export function SettingsSheet() {
   const { theme, setTheme } = useTheme()
   const { fontSize, setFontSize, versionId, setVersionId, currentVersion } = useSettings()
-  const languages = getAvailableLanguages()
+  const { t, language, setLanguage, languages } = useLanguage()
+  const bibleLanguages = getAvailableLanguages()
 
   return (
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="h-9 w-9">
           <Settings className="h-5 w-5" />
-          <span className="sr-only">Settings</span>
+          <span className="sr-only">{t.settings}</span>
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Settings</SheetTitle>
+          <SheetTitle>{t.settings}</SheetTitle>
         </SheetHeader>
 
         <div className="mt-8 space-y-8 px-4">
+          {/* Language Selection */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              {t.language}
+            </label>
+            <Select value={language} onValueChange={(value) => setLanguage(value as "en" | "pl" | "no")}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {languages.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    {lang.nativeName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Bible Version Selection */}
           <div className="space-y-3">
             <label className="text-sm font-medium flex items-center gap-2">
               <Book className="h-4 w-4" />
-              Bible Version
+              {t.bibleVersion}
             </label>
             <Select value={versionId} onValueChange={setVersionId}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a version" />
+                <SelectValue placeholder={t.selectVersion} />
               </SelectTrigger>
               <SelectContent>
-                {languages.map((lang) => (
+                {bibleLanguages.map((lang) => (
                   <SelectGroup key={lang.code}>
                     <SelectLabel>{lang.name}</SelectLabel>
                     {lang.versions.map((version) => (
@@ -80,25 +102,25 @@ export function SettingsSheet() {
 
           {/* Theme Selection */}
           <div className="space-y-3">
-            <label className="text-sm font-medium">Theme</label>
+            <label className="text-sm font-medium">{t.theme}</label>
             <div className="flex gap-2">
               <ThemeButton
                 active={theme === "light"}
                 onClick={() => setTheme("light")}
                 icon={<Sun className="h-4 w-4" />}
-                label="Light"
+                label={t.light}
               />
               <ThemeButton
                 active={theme === "dark"}
                 onClick={() => setTheme("dark")}
                 icon={<Moon className="h-4 w-4" />}
-                label="Dark"
+                label={t.dark}
               />
               <ThemeButton
                 active={theme === "system"}
                 onClick={() => setTheme("system")}
                 icon={<Monitor className="h-4 w-4" />}
-                label="System"
+                label={t.system}
               />
             </div>
           </div>
@@ -106,7 +128,7 @@ export function SettingsSheet() {
           {/* Font Size */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Font Size</label>
+              <label className="text-sm font-medium">{t.fontSize}</label>
               <span className="text-sm text-muted-foreground">{fontSize}px</span>
             </div>
             <Slider
@@ -118,34 +140,33 @@ export function SettingsSheet() {
               className="py-2"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Small</span>
-              <span>Large</span>
+              <span>{t.small}</span>
+              <span>{t.large}</span>
             </div>
           </div>
 
           {/* Sample Text Preview */}
           <div className="space-y-3">
-            <label className="text-sm font-medium">Preview</label>
+            <label className="text-sm font-medium">{t.preview}</label>
             <div className="rounded-lg border border-border bg-card p-4">
               <p
                 className="font-serif leading-relaxed text-card-foreground"
                 style={{ fontSize: `${fontSize}px` }}
               >
                 <sup className="mr-1 text-xs font-sans text-muted-foreground">1</sup>
-                In the beginning God created the heaven and the earth.
+                {t.previewText}
               </p>
             </div>
           </div>
 
           {/* About */}
           <div className="space-y-3 border-t border-border pt-6">
-            <h3 className="text-sm font-medium">About</h3>
+            <h3 className="text-sm font-medium">{t.about}</h3>
             <p className="text-sm text-muted-foreground">
-              Scripture is a minimal, open source Bible reading app focused on
-              clean reading experience and easy navigation.
+              {t.aboutDescription}
             </p>
             <p className="text-xs text-muted-foreground">
-              Version 1.0.0
+              {t.version} 1.0.0
             </p>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { type Book, bibleBooks, getBook } from "@/lib/bible-data"
 import { useSettings } from "@/components/settings-provider"
+import { useLanguage } from "@/components/language-provider"
 import { useVerses } from "@/hooks/use-verses"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -17,7 +18,13 @@ interface VerseReaderProps {
 
 export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderProps) {
   const { fontSize, versionId, currentVersion } = useSettings()
+  const { t } = useLanguage()
   const { verses, isLoading, error } = useVerses(versionId, book.id, chapter)
+
+  // Get translated book name
+  const getBookName = (b: Book) => {
+    return t.books[b.id as keyof typeof t.books] || b.name
+  }
 
   const getPreviousChapter = () => {
     if (chapter > 1) {
@@ -82,7 +89,7 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
           <div className="text-center py-8">
             <p className="text-destructive">{error}</p>
             <p className="text-sm text-muted-foreground mt-2">
-              Please try again or select a different version.
+              {t.errorTryAgain}
             </p>
           </div>
         )}
@@ -118,11 +125,11 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
             <ChevronLeft className="h-4 w-4" />
             <span className="hidden sm:inline">
               {prevBook?.id === book.id
-                ? `Chapter ${prev?.chapter}`
-                : `${prevBook?.abbrev} ${prev?.chapter}`
+                ? `${t.chapter} ${prev?.chapter}`
+                : `${prevBook ? getBookName(prevBook) : ''} ${prev?.chapter}`
               }
             </span>
-            <span className="sm:hidden">Prev</span>
+            <span className="sm:hidden">{t.prev}</span>
           </Button>
 
           <Button
@@ -132,7 +139,7 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
             className="h-9 w-9 text-muted-foreground hover:text-foreground"
           >
             <Home className="h-5 w-5" />
-            <span className="sr-only">Home</span>
+            <span className="sr-only">{t.home}</span>
           </Button>
 
           <Button
@@ -147,11 +154,11 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
           >
             <span className="hidden sm:inline">
               {nextBook?.id === book.id
-                ? `Chapter ${next?.chapter}`
-                : `${nextBook?.abbrev} ${next?.chapter}`
+                ? `${t.chapter} ${next?.chapter}`
+                : `${nextBook ? getBookName(nextBook) : ''} ${next?.chapter}`
               }
             </span>
-            <span className="sm:hidden">Next</span>
+            <span className="sm:hidden">{t.next}</span>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
