@@ -40,6 +40,11 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
   const [records, setRecords] = React.useState<ReadingRecord[]>([])
   const [selectedVerses, setSelectedVerses] = React.useState<Set<number>>(new Set())
   const [currentRecordId, setCurrentRecordId] = React.useState<string | null>(null)
+  const [currentContext, setCurrentContext] = React.useState<{
+    bookId: string
+    chapter: number
+    versionId: string
+  } | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
 
   // Load records from localStorage on mount
@@ -91,29 +96,40 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
     })
   }, [currentRecordId, saveRecords])
 
-  // Set chapter context - creates a new timeline record
+  // Set chapter context - stores context for later record creation
   const setChapterContext = React.useCallback(
     (bookId: string, chapter: number, versionId: string) => {
-      // Create a new record for this chapter visit
-      const newRecord = createReadingRecord(bookId, chapter, [], versionId)
-
-      setRecords(prev => {
-        let updated = [newRecord, ...prev]
-
-        // Trim if exceeding max records
-        if (updated.length > MAX_RECORDS) {
-          updated = updated.slice(0, MAX_RECORDS)
-        }
-
-        saveRecords(updated)
-        return updated
-      })
-
-      setCurrentRecordId(newRecord.id)
+      // Store context but don't create record until verses are selected
+      setCurrentContext({ bookId, chapter, versionId })
+      setCurrentRecordId(null)
       setSelectedVerses(new Set())
     },
-    [saveRecords]
+    []
   )
+
+  // Create a new record for the current context
+  const createRecord = React.useCallback((verses: Set<number>) => {
+    if (!currentContext || verses.size === 0) return null
+
+    const newRecord = createReadingRecord(
+      currentContext.bookId,
+      currentContext.chapter,
+      Array.from(verses),
+      currentContext.versionId
+    )
+
+    setRecords(prev => {
+      let updated = [newRecord, ...prev]
+      if (updated.length > MAX_RECORDS) {
+        updated = updated.slice(0, MAX_RECORDS)
+      }
+      saveRecords(updated)
+      return updated
+    })
+
+    setCurrentRecordId(newRecord.id)
+    return newRecord.id
+  }, [currentContext, saveRecords])
 
   // Toggle verse selection (auto-saves)
   const toggleVerse = React.useCallback((verse: number) => {
@@ -124,10 +140,27 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
       } else {
         newSet.add(verse)
       }
-      updateCurrentRecord(newSet)
+
+      // Create record on first verse selection, update on subsequent
+      if (newSet.size > 0) {
+        if (currentRecordId) {
+          updateCurrentRecord(newSet)
+        } else {
+          createRecord(newSet)
+        }
+      } else if (currentRecordId) {
+        // All verses deselected - remove the record
+        setRecords(prevRecords => {
+          const updated = prevRecords.filter(r => r.id !== currentRecordId)
+          saveRecords(updated)
+          return updated
+        })
+        setCurrentRecordId(null)
+      }
+
       return newSet
     })
-  }, [updateCurrentRecord])
+  }, [currentRecordId, updateCurrentRecord, createRecord, saveRecords])
 
   // Select all verses (auto-saves)
   const selectAllVerses = React.useCallback((totalVerses: number) => {
@@ -136,15 +169,28 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
       allVerses.add(i)
     }
     setSelectedVerses(allVerses)
-    updateCurrentRecord(allVerses)
-  }, [updateCurrentRecord])
 
-  // Clear selection (auto-saves to record)
+    if (currentRecordId) {
+      updateCurrentRecord(allVerses)
+    } else {
+      createRecord(allVerses)
+    }
+  }, [currentRecordId, updateCurrentRecord, createRecord])
+
+  // Clear selection (removes record if exists)
   const clearSelection = React.useCallback(() => {
-    const emptySet = new Set<number>()
-    setSelectedVerses(emptySet)
-    updateCurrentRecord(emptySet)
-  }, [updateCurrentRecord])
+    setSelectedVerses(new Set())
+
+    if (currentRecordId) {
+      // Remove the record since no verses are selected
+      setRecords(prev => {
+        const updated = prev.filter(r => r.id !== currentRecordId)
+        saveRecords(updated)
+        return updated
+      })
+      setCurrentRecordId(null)
+    }
+  }, [currentRecordId, saveRecords])
 
   // Reset selection UI without saving (for fresh starts on mount)
   const resetSelection = React.useCallback(() => {
