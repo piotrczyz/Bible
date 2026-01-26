@@ -28,6 +28,8 @@ interface ReadingHistoryContextType {
   markAllRead: (totalVerses: number) => void
   /** Mark all verses as unread (auto-saves) */
   markAllUnread: () => void
+  /** Delete a specific reading record */
+  deleteRecord: (recordId: string) => void
   /** Clear all reading history */
   clearHistory: () => void
   /** Check if history is loading */
@@ -192,6 +194,18 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
     updateChapterRecord(new Set())
   }, [updateChapterRecord])
 
+  // Delete a specific record
+  const deleteRecord = React.useCallback(
+    (recordId: string) => {
+      setRecords(prev => {
+        const updated = prev.filter(r => r.id !== recordId)
+        saveRecords(updated)
+        return updated
+      })
+    },
+    [saveRecords]
+  )
+
   // Clear all history
   const clearHistory = React.useCallback(() => {
     setRecords([])
@@ -212,6 +226,7 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
         toggleVerse,
         markAllRead,
         markAllUnread,
+        deleteRecord,
         clearHistory,
         isLoading,
       }}
