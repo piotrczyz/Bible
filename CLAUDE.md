@@ -44,8 +44,10 @@ This project follows an **AI-assisted development model**:
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 - **UI Components:** [shadcn/ui](https://ui.shadcn.com/) (copy-paste components, Radix primitives, MIT license)
 - **State Management:** React Context (built-in, for theme/auth/settings)
-- **Data Persistence:** localStorage (for settings/preferences)
+- **Data Persistence:** IndexedDB via Dexie.js (for offline-first data storage)
+- **Sync Engine:** Custom sync service with conflict resolution
 - **Mobile Wrapper:** [Capacitor](https://capacitorjs.com/) for iOS and Android
+- **Offline Strategy:** Offline-first architecture (app works without network)
 
 ### Design-to-Code Workflow
 
@@ -167,8 +169,238 @@ Example: `feat(auth): add biometric login for mobile`
 
 - **Responsive design** - Support various screen sizes
 - **Touch-friendly** - Minimum 44x44px touch targets
-- **Offline consideration** - Handle network unavailability gracefully
+- **Offline-first** - App must work fully offline; sync when connected
 - **Platform awareness** - Use Capacitor's platform detection when needed
+
+## Offline Support & Sync Architecture
+
+### Core Principles
+
+The app follows an **offline-first architecture**:
+
+1. **Local-first** - All data is stored locally and available offline
+2. **Background sync** - Changes sync to server when connectivity is available
+3. **Conflict resolution** - Automatic handling of conflicting changes
+4. **Transparent to user** - Sync happens seamlessly without user intervention
+
+### Data Flow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        CLIENT (App)                              │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐       │
+│  │   UI Layer   │───▶│  Sync Engine │◀──▶│  IndexedDB   │       │
+│  │   (React)    │    │              │    │  (Dexie.js)  │       │
+│  └──────────────┘    └──────┬───────┘    └──────────────┘       │
+│                             │                                    │
+└─────────────────────────────┼────────────────────────────────────┘
+                              │ (when online)
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        SERVER (API)                              │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐       │
+│  │   REST API   │───▶│  Sync Logic  │◀──▶│   Database   │       │
+│  └──────────────┘    └──────────────┘    └──────────────┘       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Local Storage Strategy
+
+#### IndexedDB (via Dexie.js)
+
+All user data is stored in IndexedDB for offline access:
+
+| Store | Purpose | Sync Priority |
+|-------|---------|---------------|
+| `bibleContent` | Bible text (books, chapters, verses) | Initial download, rarely updated |
+| `userHighlights` | Verse highlights and colors | High - sync immediately |
+| `userBookmarks` | Bookmarked verses | High - sync immediately |
+| `userNotes` | Personal notes on verses | High - sync immediately |
+| `readingProgress` | Last read position, history | Medium - sync periodically |
+| `settings` | User preferences (theme, font size) | Low - sync on change |
+| `syncQueue` | Pending changes to sync | Internal use |
+| `syncMetadata` | Last sync timestamps, versions | Internal use |
+
+#### Data Schema Pattern
+
+```typescript
+interface SyncableEntity {
+  id: string;                    // UUID, generated client-side
+  createdAt: number;             // Unix timestamp
+  updatedAt: number;             // Unix timestamp
+  deletedAt: number | null;      // Soft delete timestamp
+  syncStatus: 'pending' | 'synced' | 'conflict';
+  version: number;               // Incremented on each change
+  deviceId: string;              // Origin device identifier
+}
+```
+
+### Sync Engine
+
+#### Sync Process
+
+```
+1. App starts / comes online
+         ↓
+2. Check network connectivity
+         ↓
+3. Pull: Fetch server changes since last sync
+         ↓
+4. Merge: Apply server changes to local DB
+         ↓
+5. Resolve: Handle any conflicts
+         ↓
+6. Push: Send local pending changes to server
+         ↓
+7. Update sync metadata
+```
+
+#### Conflict Resolution Strategy
+
+When the same entity is modified on multiple devices:
+
+| Scenario | Resolution |
+|----------|------------|
+| Same field, different values | **Last-write-wins** based on `updatedAt` timestamp |
+| Different fields modified | **Merge** both changes |
+| One deleted, one modified | **Keep modification**, mark as undeleted |
+| Both deleted | **Keep deleted** |
+
+For user data (highlights, bookmarks, notes):
+- Use **last-write-wins** as default strategy
+- Store conflict history for potential manual resolution (future feature)
+
+#### Sync Queue Management
+
+```typescript
+interface SyncQueueItem {
+  id: string;
+  entityType: 'highlight' | 'bookmark' | 'note' | 'progress' | 'setting';
+  entityId: string;
+  operation: 'create' | 'update' | 'delete';
+  payload: Record<string, unknown>;
+  timestamp: number;
+  retryCount: number;
+  maxRetries: number;  // Default: 5
+}
+```
+
+### Network Handling
+
+#### Connectivity Detection
+
+Use Capacitor's Network plugin for reliable detection:
+
+```typescript
+import { Network } from '@capacitor/network';
+
+// Listen for network changes
+Network.addListener('networkStatusChange', (status) => {
+  if (status.connected) {
+    syncEngine.startSync();
+  }
+});
+```
+
+#### Retry Strategy
+
+For failed sync operations:
+
+| Retry | Delay | Notes |
+|-------|-------|-------|
+| 1 | 1 second | Immediate retry |
+| 2 | 5 seconds | Short delay |
+| 3 | 30 seconds | Medium delay |
+| 4 | 2 minutes | Longer delay |
+| 5 | 10 minutes | Final attempt |
+| Failed | - | Move to dead letter queue, notify user |
+
+### Implementation Guidelines
+
+#### Service Structure
+
+```
+src/
+├── services/
+│   ├── sync/
+│   │   ├── sync-engine.ts      # Main sync orchestrator
+│   │   ├── sync-queue.ts       # Queue management
+│   │   ├── conflict-resolver.ts # Conflict resolution logic
+│   │   ├── network-monitor.ts  # Connectivity handling
+│   │   └── index.ts
+│   ├── db/
+│   │   ├── database.ts         # Dexie.js configuration
+│   │   ├── repositories/       # Data access layer
+│   │   │   ├── highlights.ts
+│   │   │   ├── bookmarks.ts
+│   │   │   ├── notes.ts
+│   │   │   └── settings.ts
+│   │   └── index.ts
+│   └── api/
+│       ├── sync-api.ts         # Server sync endpoints
+│       └── index.ts
+├── hooks/
+│   ├── useOfflineStatus.ts     # Network status hook
+│   ├── useSyncStatus.ts        # Sync state hook
+│   └── useOfflineData.ts       # Data access with offline support
+```
+
+#### React Context for Sync State
+
+```typescript
+interface SyncContextValue {
+  isOnline: boolean;
+  isSyncing: boolean;
+  lastSyncTime: Date | null;
+  pendingChanges: number;
+  syncError: Error | null;
+  triggerSync: () => Promise<void>;
+}
+```
+
+#### UI Indicators
+
+Display sync status to users:
+- **Online + Synced** - Green checkmark or no indicator
+- **Online + Syncing** - Subtle spinner
+- **Online + Pending** - Cloud with arrow
+- **Offline** - Cloud with slash, "Changes saved locally"
+- **Sync Error** - Warning icon with retry option
+
+### Bible Content Strategy
+
+Bible text is handled differently from user data:
+
+1. **Initial Download** - Full Bible downloaded on first launch
+2. **Bundled Fallback** - Core content bundled with app binary
+3. **Incremental Updates** - Only fetch when new translations available
+4. **Version Checking** - Compare content version before downloading
+
+### Security Considerations
+
+- **Encrypt sensitive data** at rest in IndexedDB (future consideration)
+- **Authenticate sync requests** with user token
+- **Validate data integrity** with checksums
+- **Sanitize inputs** before storage and sync
+
+### Testing Offline Functionality
+
+#### Manual Testing Checklist
+
+- [ ] App loads without network connection
+- [ ] All read operations work offline
+- [ ] Write operations queue properly offline
+- [ ] Sync triggers when connection restored
+- [ ] Conflicts resolve correctly
+- [ ] UI reflects current sync state
+- [ ] No data loss during sync failures
+
+#### Automated Testing
+
+- Mock network status in tests
+- Test sync queue operations
+- Test conflict resolution scenarios
+- Test retry logic with failures
 
 ## Commands Reference
 
@@ -253,6 +485,8 @@ Before submitting code for review:
 - [ ] Responsive design considered
 - [ ] TypeScript strict mode passes
 - [ ] Tests added for new functionality
+- [ ] Works offline (data persisted locally)
+- [ ] Sync queue updated for data changes
 
 ### Things AI Must NOT Do
 
@@ -291,6 +525,10 @@ Before submitting code for review:
 | 2026-01-26 | React Context | Simple global state (theme, auth, settings), no extra dependencies | Architect |
 | 2026-01-26 | localStorage for MVP | Keep it simple, defer backend sync to future iteration | Architect |
 | 2026-01-26 | MVP scope: navigation only | Simple Bible navigation, defer highlights/AI search to future | Architect |
+| 2026-01-26 | Offline-first architecture | App must work fully offline; sync when connected | Architect |
+| 2026-01-26 | IndexedDB via Dexie.js | Robust local storage for offline data (Apache 2.0 license) | Architect |
+| 2026-01-26 | Last-write-wins conflict resolution | Simple, predictable conflict handling for user data | Architect |
+| 2026-01-26 | Background sync with retry | Automatic sync with exponential backoff on failure | Architect |
 
 ## MVP Scope
 
@@ -299,13 +537,17 @@ Before submitting code for review:
 - Reading view
 - Theme support (light/dark)
 - Basic settings
+- **Offline support** (app works without network)
+- **Local data persistence** (IndexedDB)
+- **Background sync** (when connected)
 
 ### Deferred (Future Features)
 - Verse highlights
 - AI-powered verse search
 - Bookmarks
-- Cross-device sync
 - User accounts
+- End-to-end encryption for synced data
+- Manual conflict resolution UI
 
 ## Environment Setup
 
@@ -367,6 +609,8 @@ npx cap open android
 | `@radix-ui/*` | Accessible primitives (via shadcn/ui) | Decided |
 | `class-variance-authority` | Component variants (shadcn/ui) | Decided |
 | `clsx`, `tailwind-merge` | Class utilities (shadcn/ui) | Decided |
+| `dexie` | IndexedDB wrapper for offline storage (Apache 2.0) | Decided |
+| `@capacitor/network` | Network status detection (MIT) | Decided |
 
 ### Deferred Decisions
 
@@ -374,9 +618,10 @@ npx cap open android
 
 | Category | Options | Notes |
 |----------|---------|-------|
-| Data Fetching | TanStack Query (MIT), SWR (MIT) | When backend sync is added |
+| Data Fetching | TanStack Query (MIT), SWR (MIT) | For server API calls (optional) |
 | Form Handling | React Hook Form (MIT) | When complex forms are needed |
-| Backend/Auth | TBD | When cross-device sync is implemented |
+| Backend/Auth | TBD | When user accounts are implemented |
+| Encryption | crypto-js (MIT), Web Crypto API | For E2E encrypted sync (future) |
 
 ## Troubleshooting
 
@@ -415,6 +660,13 @@ npx cap open android
 - [shadcn/ui Components](https://ui.shadcn.com/docs/components)
 - [shadcn/ui Figma Resources](https://ui.shadcn.com/docs/figma)
 - [Radix UI Primitives](https://www.radix-ui.com/) (underlying library)
+
+### Offline & Sync
+- [Dexie.js Documentation](https://dexie.org/docs/)
+- [Dexie.js Sync Protocol](https://dexie.org/docs/Syncable/Dexie.Syncable.js)
+- [Capacitor Network Plugin](https://capacitorjs.com/docs/apis/network)
+- [IndexedDB API (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API)
+- [Offline-First Web Apps](https://web.dev/offline-cookbook/)
 
 ---
 
