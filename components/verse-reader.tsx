@@ -1,8 +1,10 @@
 "use client"
 
-import { type Book, getVerses, bibleBooks, getBook } from "@/lib/bible-data"
+import { type Book, bibleBooks, getBook } from "@/lib/bible-data"
 import { useSettings } from "@/components/settings-provider"
+import { useVerses } from "@/hooks/use-verses"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -14,7 +16,7 @@ interface VerseReaderProps {
 
 export function VerseReader({ book, chapter, onNavigate }: VerseReaderProps) {
   const { fontSize, versionId, currentVersion } = useSettings()
-  const verses = getVerses(book.id, chapter, versionId)
+  const { verses, isLoading, error } = useVerses(versionId, book.id, chapter)
 
   const getPreviousChapter = () => {
     if (chapter > 1) {
@@ -62,16 +64,41 @@ export function VerseReader({ book, chapter, onNavigate }: VerseReaderProps) {
           </div>
         )}
 
-        <div className="space-y-4">
-          {verses.map((verse, index) => (
-            <p key={index} className="font-serif leading-relaxed">
-              <sup className="mr-1 text-xs font-sans text-muted-foreground select-none">
-                {index + 1}
-              </sup>
-              {verse}
+        {/* Loading state */}
+        {isLoading && (
+          <div className="space-y-4">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Error state */}
+        {error && !isLoading && (
+          <div className="text-center py-8">
+            <p className="text-destructive">{error}</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Please try again or select a different version.
             </p>
-          ))}
-        </div>
+          </div>
+        )}
+
+        {/* Verses */}
+        {!isLoading && !error && (
+          <div className="space-y-4">
+            {verses.map((verse, index) => (
+              <p key={index} className="font-serif leading-relaxed">
+                <sup className="mr-1 text-xs font-sans text-muted-foreground select-none">
+                  {index + 1}
+                </sup>
+                {verse}
+              </p>
+            ))}
+          </div>
+        )}
       </article>
 
       {/* Chapter Navigation */}
