@@ -6,6 +6,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { SettingsProvider } from '@/components/settings-provider'
 import { LanguageProvider } from '@/components/language-provider'
+import { PWARegister } from '@/components/pwa-register'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -15,6 +16,12 @@ export const metadata: Metadata = {
   title: 'Scripture - Bible Reader',
   description: 'A minimal, modern Bible reading app focused on clean reading experience',
   generator: 'v0.app',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Scripture',
+  },
   icons: {
     icon: [
       {
@@ -63,6 +70,7 @@ export default function RootLayout({
             </SettingsProvider>
           </LanguageProvider>
         </ThemeProvider>
+        <PWARegister />
         <Analytics />
       </body>
     </html>
