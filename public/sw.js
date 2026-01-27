@@ -2,7 +2,7 @@
 // Provides offline support with a cache-first strategy for static assets
 // and network-first for Bible data (to allow updates when online)
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const STATIC_CACHE = `scripture-static-${CACHE_VERSION}`;
 const BIBLE_CACHE = `scripture-bibles-${CACHE_VERSION}`;
 
@@ -10,9 +10,11 @@ const BIBLE_CACHE = `scripture-bibles-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
   '/icon.svg',
-  '/icon-light-32x32.png',
-  '/icon-dark-32x32.png',
-  '/apple-icon.png',
+  '/icon-192x192.png',
+  '/icon-512x512.png',
+  '/favicon-16x16.png',
+  '/favicon-32x32.png',
+  '/apple-touch-icon.png',
   '/manifest.json'
 ];
 
