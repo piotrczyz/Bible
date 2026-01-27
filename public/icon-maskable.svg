@@ -1,10 +1,82 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Maskable icon: content in center 80% safe zone (51.2px padding each side) -->
-  <rect width="512" height="512" fill="#0a0a0a"/>
-  <g transform="translate(92, 92) scale(1.82)">
-    <path fill="#fafafa"
-      d="M101.141 53H136.632C151.023 53 162.689 64.6662 162.689 79.0573V112.904H148.112V79.0573C148.112 78.7105 148.098 78.3662 148.072 78.0251L112.581 112.898C112.701 112.902 112.821 112.904 112.941 112.904H148.112V126.672H112.941C98.5504 126.672 86.5638 114.891 86.5638 100.5V66.7434H101.141V100.5C101.141 101.15 101.191 101.792 101.289 102.422L137.56 66.7816C137.255 66.7563 136.945 66.7434 136.632 66.7434H101.141V53Z" />
-    <path fill="#fafafa"
-      d="M65.2926 124.136L14 66.7372H34.6355L64.7495 100.436V66.7372H80.1365V118.47C80.1365 126.278 70.4953 129.958 65.2926 124.136Z" />
+<svg
+  width="512"
+  height="512"
+  viewBox="0 0 1024 1024"
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-label="Scripture app icon (maskable)"
+>
+  <!-- Background - extends to edges for maskable icon -->
+  <rect
+    x="0"
+    y="0"
+    width="1024"
+    height="1024"
+    fill="#0a0a0a"
+  />
+
+  <!-- Content scaled to 80% and centered for safe zone -->
+  <g transform="translate(102.4, 102.4) scale(0.8)">
+    <!-- Open book -->
+    <path
+      d="
+        M260 300
+        Q260 260 300 250
+        H480
+        Q512 260 512 300
+        V700
+        Q512 720 480 720
+        H320
+        Q260 720 260 680
+        Z
+      "
+      fill="#fafafa"
+    />
+
+    <path
+      d="
+        M764 300
+        Q764 260 724 250
+        H544
+        Q512 260 512 300
+        V700
+        Q512 720 544 720
+        H704
+        Q764 720 764 680
+        Z
+      "
+      fill="#fafafa"
+    />
+
+    <!-- Bottom book curve -->
+    <path
+      d="
+        M320 720
+        Q512 780 704 720
+        L704 760
+        Q512 820 320 760
+        Z
+      "
+      fill="#fafafa"
+    />
+
+    <!-- Cross (formed by negative space illusion using background color) -->
+    <rect
+      x="482"
+      y="360"
+      width="60"
+      height="280"
+      rx="30"
+      fill="#0a0a0a"
+    />
+
+    <rect
+      x="420"
+      y="450"
+      width="184"
+      height="60"
+      rx="30"
+      fill="#0a0a0a"
+    />
   </g>
 </svg>
