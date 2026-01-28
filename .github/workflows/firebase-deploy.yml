@@ -67,7 +67,7 @@ jobs:
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/firebase-sa.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
-          npx firebase-tools deploy --only functions --project ${{ secrets.FIREBASE_PROJECT_ID }}
+          npx firebase-tools deploy --only functions --project ${{ secrets.FIREBASE_PROJECT_ID }} --non-interactive
 
       - name: Deploy to Firebase Hosting (Production)
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
