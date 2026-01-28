@@ -23,13 +23,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
-import { Settings, Sun, Moon, Monitor, Book, Globe } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Settings, Sun, Moon, Monitor, Book, Globe, Key } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getAvailableLanguages } from "@/lib/bible-versions"
 
 export function SettingsSheet() {
   const { theme, setTheme } = useTheme()
-  const { fontSize, setFontSize, versionId, setVersionId, currentVersion } = useSettings()
+  const { fontSize, setFontSize, versionId, setVersionId, currentVersion, openaiApiKey, setOpenaiApiKey } = useSettings()
   const { t, language, setLanguage, languages } = useLanguage()
   const bibleLanguages = getAvailableLanguages()
 
@@ -98,6 +99,24 @@ export function SettingsSheet() {
                 {currentVersion.description}
               </p>
             )}
+          </div>
+
+          {/* OpenAI API Key */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <Key className="h-4 w-4" />
+              {t.openaiApiKey}
+            </label>
+            <Input
+              type="password"
+              value={openaiApiKey}
+              onChange={(e) => setOpenaiApiKey(e.target.value)}
+              placeholder={t.openaiApiKeyPlaceholder}
+              className="font-mono text-sm"
+            />
+            <p className="text-xs text-muted-foreground">
+              {t.openaiApiKeyDescription}
+            </p>
           </div>
 
           {/* Theme Selection */}

@@ -14,6 +14,8 @@ interface SettingsContextType {
   versionId: string
   setVersionId: (id: string) => void
   currentVersion: BibleVersion | undefined
+  openaiApiKey: string
+  setOpenaiApiKey: (key: string) => void
 }
 
 const SettingsContext = React.createContext<SettingsContextType | undefined>(undefined)
@@ -21,6 +23,7 @@ const SettingsContext = React.createContext<SettingsContextType | undefined>(und
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [fontSize, setFontSize] = React.useState(18)
   const [versionId, setVersionId] = React.useState(DEFAULT_VERSION_ID)
+  const [openaiApiKey, setOpenaiApiKey] = React.useState("")
 
   // Load settings from localStorage on mount
   React.useEffect(() => {
@@ -32,6 +35,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const savedVersionId = localStorage.getItem("bible-version-id")
     if (savedVersionId && isValidVersionId(savedVersionId)) {
       setVersionId(savedVersionId)
+    }
+
+    const savedApiKey = localStorage.getItem("bible-openai-api-key")
+    if (savedApiKey) {
+      setOpenaiApiKey(savedApiKey)
     }
   }, [])
 
@@ -47,6 +55,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  const handleSetOpenaiApiKey = React.useCallback((key: string) => {
+    setOpenaiApiKey(key)
+    if (key) {
+      localStorage.setItem("bible-openai-api-key", key)
+    } else {
+      localStorage.removeItem("bible-openai-api-key")
+    }
+  }, [])
+
   const currentVersion = React.useMemo(() => getBibleVersion(versionId), [versionId])
 
   return (
@@ -57,6 +74,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         versionId,
         setVersionId: handleSetVersionId,
         currentVersion,
+        openaiApiKey,
+        setOpenaiApiKey: handleSetOpenaiApiKey,
       }}
     >
       {children}

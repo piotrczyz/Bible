@@ -8,6 +8,7 @@ import { ChapterGrid } from "@/components/chapter-grid"
 import { VerseReader } from "@/components/verse-reader"
 import { SettingsSheet } from "@/components/settings-sheet"
 import { TimelineSheet } from "@/components/timeline-sheet"
+import { AISearch } from "@/components/ai-search"
 import { useLanguage } from "@/components/language-provider"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Home } from "lucide-react"
@@ -21,6 +22,7 @@ export default function BibleApp() {
   const [view, setView] = React.useState<View>("books")
   const [selectedBook, setSelectedBook] = React.useState<Book | null>(null)
   const [selectedChapter, setSelectedChapter] = React.useState<number>(1)
+  const [initialVerse, setInitialVerse] = React.useState<number | undefined>(undefined)
   const [filter, setFilter] = React.useState<TestamentFilter>("all")
   const { t } = useLanguage()
 
@@ -31,6 +33,7 @@ export default function BibleApp() {
 
   const handleSelectChapter = (chapter: number) => {
     setSelectedChapter(chapter)
+    setInitialVerse(undefined) // Clear initial verse for normal navigation
     setView("reader")
   }
 
@@ -47,6 +50,17 @@ export default function BibleApp() {
     if (book) {
       setSelectedBook(book)
       setSelectedChapter(chapter)
+      setInitialVerse(undefined)
+      setView("reader")
+    }
+  }
+
+  const handleNavigateFromSearch = (bookId: string, chapter: number, verse: number) => {
+    const book = getBook(bookId)
+    if (book) {
+      setSelectedBook(book)
+      setSelectedChapter(chapter)
+      setInitialVerse(verse)
       setView("reader")
     }
   }
@@ -110,6 +124,7 @@ export default function BibleApp() {
           </div>
 
           <div className="flex items-center gap-1">
+            <AISearch onNavigate={handleNavigateFromSearch} />
             <TimelineSheet onNavigate={handleNavigateFromTimeline} />
             <SettingsSheet />
           </div>
@@ -194,6 +209,7 @@ export default function BibleApp() {
             chapter={selectedChapter}
             onNavigate={handleNavigate}
             onHome={handleHome}
+            initialVerse={initialVerse}
           />
         )}
       </main>

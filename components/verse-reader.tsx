@@ -16,9 +16,10 @@ interface VerseReaderProps {
   chapter: number
   onNavigate: (bookId: string, chapter: number) => void
   onHome: () => void
+  initialVerse?: number
 }
 
-export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderProps) {
+export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }: VerseReaderProps) {
   const { fontSize, versionId, currentVersion } = useSettings()
   const { t } = useLanguage()
   const {
@@ -44,6 +45,23 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
   useEffect(() => {
     setChapterContext(book.id, chapter, versionId)
   }, [book.id, chapter, versionId, setChapterContext])
+
+  // Scroll to initial verse when navigating from search
+  useEffect(() => {
+    if (initialVerse && !isLoading && verses.length > 0) {
+      const verseElement = document.getElementById(`verse-${initialVerse}`)
+      if (verseElement) {
+        // Small delay to ensure the DOM is ready
+        setTimeout(() => {
+          verseElement.scrollIntoView({ behavior: "smooth", block: "center" })
+          // Also select the verse to add to timeline
+          if (!selectedVerses.has(initialVerse)) {
+            toggleVerse(initialVerse)
+          }
+        }, 100)
+      }
+    }
+  }, [initialVerse, isLoading, verses.length])
 
   // Handle verse click - toggle read status
   const handleVerseClick = (verseNumber: number) => {
@@ -178,8 +196,12 @@ export function VerseReader({ book, chapter, onNavigate, onHome }: VerseReaderPr
               return (
                 <p
                   key={index}
+                  id={`verse-${verseNumber}`}
                   onClick={() => handleVerseClick(verseNumber)}
-                  className="font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-colors hover:bg-secondary/30 active:bg-secondary/50"
+                  className={cn(
+                    "font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-colors hover:bg-secondary/30 active:bg-secondary/50",
+                    initialVerse === verseNumber && "bg-primary/10 ring-2 ring-primary/20"
+                  )}
                 >
                   <span className="inline-flex items-baseline gap-1 mr-1">
                     <sup className="text-xs font-sans text-muted-foreground select-none">
