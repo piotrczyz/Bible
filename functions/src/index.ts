@@ -118,6 +118,9 @@ export const search = onRequest(
   {
     secrets: [openaiApiKey],
     cors: true,
+    region: "us-central1",
+    memory: "256MiB",
+    timeoutSeconds: 60,
   },
   async (req, res) => {
     // Only allow POST requests
