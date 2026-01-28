@@ -23,6 +23,16 @@ export interface Translations {
   prev: string;
   next: string;
 
+  // PWA Install Prompt
+  installApp: string;
+  installDescription: string;
+  install: string;
+  notNow: string;
+  iosInstallTitle: string;
+  iosInstallStep1: string;
+  iosInstallStep2: string;
+  iosInstallStep3: string;
+
   // Testament filters
   all: string;
   oldTestament: string;
@@ -143,14 +153,24 @@ export interface Translations {
 
 const en: Translations = {
   // App
-  appTitle: "Scripture",
-  appDescription: "A minimal, modern Bible reading app focused on clean reading experience",
+  appTitle: "Bible AI",
+  appDescription: "Your AI assistant for Bible reading and search",
 
   // Navigation
   back: "Back",
   home: "Home",
   prev: "Prev",
   next: "Next",
+
+  // PWA Install Prompt
+  installApp: "Install Bible AI",
+  installDescription: "Install the app for offline reading and a better experience.",
+  install: "Install",
+  notNow: "Not now",
+  iosInstallTitle: "Install on iOS",
+  iosInstallStep1: "Tap the Share button",
+  iosInstallStep2: "Scroll down and tap \"Add to Home Screen\"",
+  iosInstallStep3: "Tap \"Add\" to install",
 
   // Testament filters
   all: "All",
@@ -175,7 +195,7 @@ const en: Translations = {
   preview: "Preview",
   previewText: "In the beginning God created the heaven and the earth.",
   about: "About",
-  aboutDescription: "Scripture is a minimal, open source Bible reading app focused on clean reading experience and easy navigation.",
+  aboutDescription: "Bible AI is your AI assistant for Bible reading and search. Open source, focused on clean reading experience.",
   version: "Version",
   language: "Language",
 
@@ -272,14 +292,24 @@ const en: Translations = {
 
 const pl: Translations = {
   // App
-  appTitle: "Pismo",
-  appDescription: "Minimalistyczna, nowoczesna aplikacja do czytania Biblii",
+  appTitle: "Bible AI",
+  appDescription: "Twój asystent AI do czytania i wyszukiwania w Biblii",
 
   // Navigation
   back: "Wstecz",
   home: "Strona główna",
   prev: "Poprz.",
   next: "Nast.",
+
+  // PWA Install Prompt
+  installApp: "Zainstaluj Bible AI",
+  installDescription: "Zainstaluj aplikację, aby czytać offline i mieć lepsze doświadczenie.",
+  install: "Zainstaluj",
+  notNow: "Nie teraz",
+  iosInstallTitle: "Zainstaluj na iOS",
+  iosInstallStep1: "Dotknij przycisk Udostępnij",
+  iosInstallStep2: "Przewiń w dół i dotknij \"Dodaj do ekranu głównego\"",
+  iosInstallStep3: "Dotknij \"Dodaj\", aby zainstalować",
 
   // Testament filters
   all: "Wszystkie",
@@ -304,7 +334,7 @@ const pl: Translations = {
   preview: "Podgląd",
   previewText: "Na początku stworzył Bóg niebo i ziemię.",
   about: "O aplikacji",
-  aboutDescription: "Pismo to minimalistyczna aplikacja do czytania Biblii o otwartym kodzie źródłowym, skupiona na czystym doświadczeniu czytania i łatwej nawigacji.",
+  aboutDescription: "Bible AI to Twój asystent AI do czytania i wyszukiwania w Biblii. Open source, skupiona na czystym doświadczeniu czytania.",
   version: "Wersja",
   language: "Język",
 
@@ -401,14 +431,24 @@ const pl: Translations = {
 
 const no: Translations = {
   // App
-  appTitle: "Skriften",
-  appDescription: "En minimal, moderne app for bibellesing med fokus på ren leseopplevelse",
+  appTitle: "Bible AI",
+  appDescription: "Din AI-assistent for bibellesing og søk",
 
   // Navigation
   back: "Tilbake",
   home: "Hjem",
   prev: "Forrige",
   next: "Neste",
+
+  // PWA Install Prompt
+  installApp: "Installer Bible AI",
+  installDescription: "Installer appen for offline lesing og en bedre opplevelse.",
+  install: "Installer",
+  notNow: "Ikke nå",
+  iosInstallTitle: "Installer på iOS",
+  iosInstallStep1: "Trykk på Del-knappen",
+  iosInstallStep2: "Rull ned og trykk \"Legg til på Hjem-skjerm\"",
+  iosInstallStep3: "Trykk \"Legg til\" for å installere",
 
   // Testament filters
   all: "Alle",
@@ -433,7 +473,7 @@ const no: Translations = {
   preview: "Forhåndsvisning",
   previewText: "I begynnelsen skapte Gud himmelen og jorden.",
   about: "Om",
-  aboutDescription: "Skriften er en minimal, åpen kildekode bibelleser-app med fokus på ren leseopplevelse og enkel navigasjon.",
+  aboutDescription: "Bible AI er din AI-assistent for bibellesing og søk. Åpen kildekode, fokus på ren leseopplevelse.",
   version: "Versjon",
   language: "Språk",
 
