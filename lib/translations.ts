@@ -80,6 +80,14 @@ export interface Translations {
   markAllUnread: string;
   save: string;
 
+  // AI Search
+  aiSearch: string;
+  aiSearchPlaceholder: string;
+  aiSearchInstructions: string;
+  aiSearchNoResults: string;
+  aiSearchError: string;
+  searching: string;
+
   // Bible book names
   books: {
     gen: string;
@@ -218,6 +226,14 @@ const en: Translations = {
   markAllRead: "Mark all read",
   markAllUnread: "Mark all unread",
   save: "Save",
+
+  // AI Search
+  aiSearch: "AI Search",
+  aiSearchPlaceholder: "Describe the verse you're looking for...",
+  aiSearchInstructions: "Describe a Bible verse in your own words. You don't need to remember the exact text - just describe what it's about and AI will find it for you.",
+  aiSearchNoResults: "No matching verses found. Try describing the verse differently.",
+  aiSearchError: "Search failed. Please try again later.",
+  searching: "Searching...",
 
   // Bible book names
   books: {
@@ -358,6 +374,14 @@ const pl: Translations = {
   markAllUnread: "Oznacz wszystko jako nieprzeczytane",
   save: "Zapisz",
 
+  // AI Search
+  aiSearch: "Wyszukiwanie AI",
+  aiSearchPlaceholder: "Opisz werset, którego szukasz...",
+  aiSearchInstructions: "Opisz werset biblijny własnymi słowami. Nie musisz pamiętać dokładnego tekstu - wystarczy opisać, o czym jest, a AI znajdzie go za Ciebie.",
+  aiSearchNoResults: "Nie znaleziono pasujących wersetów. Spróbuj opisać werset inaczej.",
+  aiSearchError: "Wyszukiwanie nie powiodło się. Spróbuj ponownie później.",
+  searching: "Szukam...",
+
   // Bible book names
   books: {
     gen: "Księga Rodzaju",
@@ -496,6 +520,14 @@ const no: Translations = {
   markAllRead: "Merk alle som lest",
   markAllUnread: "Merk alle som ulest",
   save: "Lagre",
+
+  // AI Search
+  aiSearch: "AI-søk",
+  aiSearchPlaceholder: "Beskriv verset du leter etter...",
+  aiSearchInstructions: "Beskriv et bibelvers med egne ord. Du trenger ikke huske den nøyaktige teksten - bare beskriv hva det handler om, så finner AI det for deg.",
+  aiSearchNoResults: "Ingen matchende vers funnet. Prøv å beskrive verset annerledes.",
+  aiSearchError: "Søket mislyktes. Vennligst prøv igjen senere.",
+  searching: "Søker...",
 
   // Bible book names
   books: {

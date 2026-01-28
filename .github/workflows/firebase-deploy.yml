@@ -1,4 +1,4 @@
-name: Deploy to Firebase Hosting
+name: Deploy to Firebase
 
 on:
   push:
@@ -36,8 +36,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
+      - name: Build web app
         run: pnpm run build
+
+      - name: Install functions dependencies
+        run: cd functions && npm install
+
+      - name: Build functions
+        run: cd functions && npm run build
 
       - name: Deploy to Firebase Hosting (Preview)
         if: github.event_name == 'pull_request'
@@ -47,6 +53,21 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
           expires: 7d
+
+      - name: Set Firebase Functions secrets
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/firebase-sa.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
+          npx firebase-tools functions:secrets:set OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" --project ${{ secrets.FIREBASE_PROJECT_ID }} --force
+        continue-on-error: true
+
+      - name: Deploy Functions (Production)
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/firebase-sa.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
+          npx firebase-tools deploy --only functions --project ${{ secrets.FIREBASE_PROJECT_ID }} --non-interactive
 
       - name: Deploy to Firebase Hosting (Production)
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
