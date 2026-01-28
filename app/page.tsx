@@ -10,7 +10,8 @@ import { SettingsSheet } from "@/components/settings-sheet"
 import { TimelineSheet } from "@/components/timeline-sheet"
 import { useLanguage } from "@/components/language-provider"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, BookOpen, Home } from "lucide-react"
+import { ChevronLeft, ChevronRight, Home } from "lucide-react"
+import { ScriptureIcon } from "@/components/scripture-icon"
 import { cn } from "@/lib/utils"
 
 type View = "books" | "chapters" | "reader"
@@ -89,7 +90,7 @@ export default function BibleApp() {
 
             {view === "books" && (
               <div className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
+                <ScriptureIcon className="h-5 w-5" />
                 <h1 className="text-lg font-semibold">{t.appTitle}</h1>
               </div>
             )}
