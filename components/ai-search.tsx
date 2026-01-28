@@ -104,10 +104,10 @@ export function AISearch({ onNavigate }: AISearchProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto max-w-2xl px-4 py-4">
-        {/* Search Header */}
-        <div className="flex items-center gap-2">
+    <div className="fixed inset-0 z-50 bg-background">
+      {/* Header with search input */}
+      <div className="sticky top-0 border-b border-border bg-background px-4 py-3 safe-area-inset-top">
+        <div className="mx-auto max-w-2xl flex items-center gap-2">
           <form onSubmit={handleSearch} className="flex-1">
             <div className="relative">
               <Sparkles className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -117,7 +117,7 @@ export function AISearch({ onNavigate }: AISearchProps) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t.aiSearchPlaceholder}
-                className="pl-10 pr-4"
+                className="pl-10 pr-4 h-11"
                 disabled={isLoading}
               />
             </div>
@@ -126,22 +126,25 @@ export function AISearch({ onNavigate }: AISearchProps) {
             variant="ghost"
             size="icon"
             onClick={handleClose}
-            className="h-10 w-10 shrink-0"
+            className="h-11 w-11 shrink-0"
           >
             <X className="h-5 w-5" />
           </Button>
         </div>
+      </div>
 
+      {/* Content area */}
+      <div className="mx-auto max-w-2xl px-4 py-6 overflow-y-auto" style={{ maxHeight: 'calc(100dvh - 70px)' }}>
         {/* Instructions */}
         {!isLoading && results.length === 0 && !error && (
-          <p className="mt-4 text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground leading-relaxed">
             {t.aiSearchInstructions}
           </p>
         )}
 
         {/* Loading State */}
         {isLoading && (
-          <div className="mt-8 flex items-center justify-center gap-2 text-muted-foreground">
+          <div className="flex items-center justify-center gap-2 text-muted-foreground py-8">
             <Loader2 className="h-5 w-5 animate-spin" />
             <span>{t.searching}</span>
           </div>
@@ -149,33 +152,33 @@ export function AISearch({ onNavigate }: AISearchProps) {
 
         {/* Error State */}
         {error && (
-          <div className="mt-4 rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
             <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
 
         {/* Results */}
         {results.length > 0 && (
-          <div className="mt-4 space-y-2">
+          <div className="space-y-3">
             {results.map((result, index) => (
               <button
                 key={`${result.bookId}-${result.chapter}-${result.verse}-${index}`}
                 onClick={() => handleSelectResult(result)}
                 className={cn(
                   "w-full rounded-lg border border-border bg-card p-4 text-left transition-colors",
-                  "hover:border-foreground/20 hover:bg-accent"
+                  "hover:border-foreground/20 hover:bg-accent active:bg-accent"
                 )}
               >
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <p className="font-medium">
+                    <p className="font-medium text-foreground">
                       {t.books[result.bookId as keyof typeof t.books] || result.bookName} {result.chapter}:{result.verse}
                     </p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2 text-xs">
                       <span className={cn(
                         "rounded-full px-2 py-0.5",
-                        result.confidence >= 80 ? "bg-green-500/10 text-green-600 dark:text-green-400" :
-                        result.confidence >= 50 ? "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400" :
+                        result.confidence >= 80 ? "bg-green-500/20 text-green-600 dark:text-green-400" :
+                        result.confidence >= 50 ? "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400" :
                         "bg-muted text-muted-foreground"
                       )}>
                         {result.confidence}% match
