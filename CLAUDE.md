@@ -69,11 +69,14 @@ Bible/
 ├── tsconfig.json          # TypeScript configuration
 ├── components.json        # shadcn/ui configuration
 ├── app/                   # Next.js App Router
+│   ├── api/               # API routes
+│   │   └── search/        # AI-powered verse search endpoint
 │   ├── layout.tsx         # Root layout with providers
 │   ├── page.tsx           # Home page (book/chapter/reader views)
 │   └── globals.css        # Global styles
 ├── components/            # React components
 │   ├── ui/                # shadcn/ui primitives
+│   ├── ai-search.tsx      # AI-powered verse search overlay
 │   ├── book-list.tsx      # Book selection grid
 │   ├── chapter-grid.tsx   # Chapter selection grid
 │   ├── verse-reader.tsx   # Verse display with navigation
@@ -594,6 +597,7 @@ Before submitting code for review:
 | 2026-01-26 | Background sync with retry | Automatic sync with exponential backoff on failure | Architect |
 | 2026-01-26 | Reading history with timestamps | Track chapter reads for analytics and future Firebase sync | Architect |
 | 2026-01-26 | UUID + ISO 8601 for reading records | Firebase-compatible data structure, conflict-free sync | Architect |
+| 2026-01-28 | AI-powered verse search | Semantic search using OpenAI API, server-side API key | Architect |
 
 ## MVP Scope
 
@@ -608,10 +612,10 @@ Before submitting code for review:
 - **Offline support** (app works without network)
 - **Local data persistence** (IndexedDB via Dexie.js)
 - **Background sync** (when connected)
+- **AI-powered verse search** (semantic search using OpenAI)
 
 ### Deferred (Future Features)
 - Verse highlights
-- AI-powered verse search
 - Bookmarks
 - User accounts
 - Firebase sync for reading history
@@ -627,6 +631,21 @@ Before submitting code for review:
 - For iOS: macOS with Xcode
 - For Android: Android Studio with SDK
 
+### Environment Variables
+
+The application requires the following environment variables:
+
+| Variable | Purpose | Required |
+|----------|---------|----------|
+| `OPENAI_API_KEY` | OpenAI API key for AI-powered verse search | Yes (for AI search) |
+
+**Local Development:** Create a `.env.local` file in the project root:
+```
+OPENAI_API_KEY=sk-your-key-here
+```
+
+**Production:** Environment variables are configured via GitHub Actions secrets and injected during deployment.
+
 ### Local Development Setup
 
 ```bash
@@ -636,6 +655,8 @@ cd Bible
 
 # Install dependencies
 npm install
+
+# Create .env.local with required variables (see above)
 
 # Start development server
 npm run dev
@@ -739,5 +760,6 @@ npx cap open android
 
 ---
 
-*Last updated: 2026-01-26*
+*Last updated: 2026-01-28*
 *Reading history/timeline feature added: 2026-01-26*
+*AI-powered verse search added: 2026-01-28*
