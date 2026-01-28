@@ -244,9 +244,11 @@ npm run lint:fix
 
 ### Before Starting Any Task
 
-1. **Read existing code** - Understand current patterns and structure
-2. **Check CLAUDE.md** - Follow documented conventions
-3. **Ask if unclear** - Request clarification on architectural decisions
+1. **Gather requirements** - Ensure you have all information needed before starting
+2. **Research and evaluate scope** - Use web search, docs, and codebase exploration to understand the full scope
+3. **Ask clarifying questions** - If requirements are ambiguous, ask before implementing
+4. **Read existing code** - Understand current patterns and structure
+5. **Check CLAUDE.md** - Follow documented conventions
 
 ### When Implementing Features
 
