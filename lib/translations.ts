@@ -86,11 +86,7 @@ export interface Translations {
   aiSearchInstructions: string;
   aiSearchNoResults: string;
   aiSearchError: string;
-  aiSearchApiKeyRequired: string;
   searching: string;
-  openaiApiKey: string;
-  openaiApiKeyPlaceholder: string;
-  openaiApiKeyDescription: string;
 
   // Bible book names
   books: {
@@ -236,12 +232,8 @@ const en: Translations = {
   aiSearchPlaceholder: "Describe the verse you're looking for...",
   aiSearchInstructions: "Describe a Bible verse in your own words. You don't need to remember the exact text - just describe what it's about and AI will find it for you.",
   aiSearchNoResults: "No matching verses found. Try describing the verse differently.",
-  aiSearchError: "Search failed. Please check your API key and try again.",
-  aiSearchApiKeyRequired: "Please add your OpenAI API key in Settings to use AI search.",
+  aiSearchError: "Search failed. Please try again later.",
   searching: "Searching...",
-  openaiApiKey: "OpenAI API Key",
-  openaiApiKeyPlaceholder: "sk-...",
-  openaiApiKeyDescription: "Required for AI-powered verse search. Your key is stored locally and never sent to our servers.",
 
   // Bible book names
   books: {
@@ -387,12 +379,8 @@ const pl: Translations = {
   aiSearchPlaceholder: "Opisz werset, którego szukasz...",
   aiSearchInstructions: "Opisz werset biblijny własnymi słowami. Nie musisz pamiętać dokładnego tekstu - wystarczy opisać, o czym jest, a AI znajdzie go za Ciebie.",
   aiSearchNoResults: "Nie znaleziono pasujących wersetów. Spróbuj opisać werset inaczej.",
-  aiSearchError: "Wyszukiwanie nie powiodło się. Sprawdź klucz API i spróbuj ponownie.",
-  aiSearchApiKeyRequired: "Dodaj klucz API OpenAI w Ustawieniach, aby korzystać z wyszukiwania AI.",
+  aiSearchError: "Wyszukiwanie nie powiodło się. Spróbuj ponownie później.",
   searching: "Szukam...",
-  openaiApiKey: "Klucz API OpenAI",
-  openaiApiKeyPlaceholder: "sk-...",
-  openaiApiKeyDescription: "Wymagany do wyszukiwania wersetów za pomocą AI. Twój klucz jest przechowywany lokalnie i nigdy nie jest wysyłany na nasze serwery.",
 
   // Bible book names
   books: {
@@ -538,12 +526,8 @@ const no: Translations = {
   aiSearchPlaceholder: "Beskriv verset du leter etter...",
   aiSearchInstructions: "Beskriv et bibelvers med egne ord. Du trenger ikke huske den nøyaktige teksten - bare beskriv hva det handler om, så finner AI det for deg.",
   aiSearchNoResults: "Ingen matchende vers funnet. Prøv å beskrive verset annerledes.",
-  aiSearchError: "Søket mislyktes. Vennligst sjekk API-nøkkelen din og prøv igjen.",
-  aiSearchApiKeyRequired: "Legg til OpenAI API-nøkkelen din i Innstillinger for å bruke AI-søk.",
+  aiSearchError: "Søket mislyktes. Vennligst prøv igjen senere.",
   searching: "Søker...",
-  openaiApiKey: "OpenAI API-nøkkel",
-  openaiApiKeyPlaceholder: "sk-...",
-  openaiApiKeyDescription: "Nødvendig for AI-drevet vers-søk. Nøkkelen din lagres lokalt og sendes aldri til våre servere.",
 
   // Bible book names
   books: {

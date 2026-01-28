@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import { type Book, bibleBooks, getBook } from "@/lib/bible-data"
 import { useSettings } from "@/components/settings-provider"
 import { useLanguage } from "@/components/language-provider"
@@ -32,6 +32,9 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
   } = useReadingHistory()
   const { verses, isLoading, error } = useVerses(versionId, book.id, chapter)
 
+  // Track highlighted verse from search (with fade-out animation)
+  const [highlightedVerse, setHighlightedVerse] = useState<number | null>(null)
+
   // Clear selection on mount (fresh start for every chapter visit)
   const hasInitialized = useRef(false)
   useEffect(() => {
@@ -46,19 +49,25 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
     setChapterContext(book.id, chapter, versionId)
   }, [book.id, chapter, versionId, setChapterContext])
 
-  // Scroll to initial verse when navigating from search
+  // Scroll to initial verse when navigating from search and show fade-out highlight
   useEffect(() => {
     if (initialVerse && !isLoading && verses.length > 0) {
       const verseElement = document.getElementById(`verse-${initialVerse}`)
       if (verseElement) {
-        // Small delay to ensure the DOM is ready
+        // Set highlight immediately
+        setHighlightedVerse(initialVerse)
+
+        // Small delay to ensure the DOM is ready, then scroll
         setTimeout(() => {
           verseElement.scrollIntoView({ behavior: "smooth", block: "center" })
-          // Also select the verse to add to timeline
-          if (!selectedVerses.has(initialVerse)) {
-            toggleVerse(initialVerse)
-          }
         }, 100)
+
+        // Clear highlight after animation (3 seconds)
+        const fadeTimeout = setTimeout(() => {
+          setHighlightedVerse(null)
+        }, 3000)
+
+        return () => clearTimeout(fadeTimeout)
       }
     }
   }, [initialVerse, isLoading, verses.length])
@@ -199,8 +208,8 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
                   id={`verse-${verseNumber}`}
                   onClick={() => handleVerseClick(verseNumber)}
                   className={cn(
-                    "font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-colors hover:bg-secondary/30 active:bg-secondary/50",
-                    initialVerse === verseNumber && "bg-primary/10 ring-2 ring-primary/20"
+                    "font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-all duration-1000 hover:bg-secondary/30 active:bg-secondary/50",
+                    highlightedVerse === verseNumber && "bg-primary/20 ring-2 ring-primary/30 animate-pulse"
                   )}
                 >
                   <span className="inline-flex items-baseline gap-1 mr-1">

@@ -49,7 +49,7 @@ Do NOT include any explanation or text outside the JSON array.`
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { query, apiKey } = body as { query: string; apiKey: string }
+    const { query } = body as { query: string }
 
     if (!query || typeof query !== "string") {
       return NextResponse.json(
@@ -58,10 +58,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!apiKey || typeof apiKey !== "string") {
+    const apiKey = process.env.OPENAI_API_KEY
+    if (!apiKey) {
       return NextResponse.json(
-        { error: "API key is required" },
-        { status: 400 }
+        { error: "OpenAI API key not configured" },
+        { status: 500 }
       )
     }
 

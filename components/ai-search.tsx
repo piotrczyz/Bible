@@ -5,8 +5,6 @@ import { Search, X, Loader2, Sparkles, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/components/language-provider"
-import { useSettings } from "@/components/settings-provider"
-import { useReadingHistory } from "@/components/reading-history-provider"
 import { cn } from "@/lib/utils"
 import type { SearchResult } from "@/app/api/search/route"
 
@@ -23,8 +21,6 @@ export function AISearch({ onNavigate }: AISearchProps) {
   const inputRef = React.useRef<HTMLInputElement>(null)
 
   const { t } = useLanguage()
-  const { openaiApiKey, versionId } = useSettings()
-  const { setChapterContext, selectAllVerses } = useReadingHistory()
 
   const handleExpand = () => {
     setIsExpanded(true)
@@ -43,11 +39,6 @@ export function AISearch({ onNavigate }: AISearchProps) {
 
     if (!query.trim()) return
 
-    if (!openaiApiKey) {
-      setError(t.aiSearchApiKeyRequired)
-      return
-    }
-
     setIsLoading(true)
     setError(null)
     setResults([])
@@ -56,7 +47,7 @@ export function AISearch({ onNavigate }: AISearchProps) {
       const response = await fetch("/api/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: query.trim(), apiKey: openaiApiKey }),
+        body: JSON.stringify({ query: query.trim() }),
       })
 
       const data = await response.json()
@@ -80,10 +71,7 @@ export function AISearch({ onNavigate }: AISearchProps) {
   }
 
   const handleSelectResult = (result: SearchResult) => {
-    // Set chapter context for reading history
-    setChapterContext(result.bookId, result.chapter, versionId)
-
-    // Navigate to the verse
+    // Navigate to the verse (will show highlight with fade-out animation)
     onNavigate(result.bookId, result.chapter, result.verse)
 
     // Close the search
