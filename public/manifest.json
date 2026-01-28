@@ -1,7 +1,7 @@
 {
-  "name": "Scripture - Bible Reader",
-  "short_name": "Scripture",
-  "description": "A minimal, modern Bible reading app focused on clean reading experience",
+  "name": "Bible AI - Your AI Assistant in Reading",
+  "short_name": "Bible AI",
+  "description": "Your AI assistant for Bible reading and search",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",

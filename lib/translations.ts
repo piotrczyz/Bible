@@ -153,8 +153,8 @@ export interface Translations {
 
 const en: Translations = {
   // App
-  appTitle: "Scripture",
-  appDescription: "A minimal, modern Bible reading app focused on clean reading experience",
+  appTitle: "Bible AI",
+  appDescription: "Your AI assistant for Bible reading and search",
 
   // Navigation
   back: "Back",
@@ -163,7 +163,7 @@ const en: Translations = {
   next: "Next",
 
   // PWA Install Prompt
-  installApp: "Install Scripture",
+  installApp: "Install Bible AI",
   installDescription: "Install the app for offline reading and a better experience.",
   install: "Install",
   notNow: "Not now",
@@ -195,7 +195,7 @@ const en: Translations = {
   preview: "Preview",
   previewText: "In the beginning God created the heaven and the earth.",
   about: "About",
-  aboutDescription: "Scripture is a minimal, open source Bible reading app focused on clean reading experience and easy navigation.",
+  aboutDescription: "Bible AI is your AI assistant for Bible reading and search. Open source, focused on clean reading experience.",
   version: "Version",
   language: "Language",
 
@@ -292,8 +292,8 @@ const en: Translations = {
 
 const pl: Translations = {
   // App
-  appTitle: "Pismo",
-  appDescription: "Minimalistyczna, nowoczesna aplikacja do czytania Biblii",
+  appTitle: "Bible AI",
+  appDescription: "Twój asystent AI do czytania i wyszukiwania w Biblii",
 
   // Navigation
   back: "Wstecz",
@@ -302,7 +302,7 @@ const pl: Translations = {
   next: "Nast.",
 
   // PWA Install Prompt
-  installApp: "Zainstaluj Pismo",
+  installApp: "Zainstaluj Bible AI",
   installDescription: "Zainstaluj aplikację, aby czytać offline i mieć lepsze doświadczenie.",
   install: "Zainstaluj",
   notNow: "Nie teraz",
@@ -334,7 +334,7 @@ const pl: Translations = {
   preview: "Podgląd",
   previewText: "Na początku stworzył Bóg niebo i ziemię.",
   about: "O aplikacji",
-  aboutDescription: "Pismo to minimalistyczna aplikacja do czytania Biblii o otwartym kodzie źródłowym, skupiona na czystym doświadczeniu czytania i łatwej nawigacji.",
+  aboutDescription: "Bible AI to Twój asystent AI do czytania i wyszukiwania w Biblii. Open source, skupiona na czystym doświadczeniu czytania.",
   version: "Wersja",
   language: "Język",
 
@@ -431,8 +431,8 @@ const pl: Translations = {
 
 const no: Translations = {
   // App
-  appTitle: "Skriften",
-  appDescription: "En minimal, moderne app for bibellesing med fokus på ren leseopplevelse",
+  appTitle: "Bible AI",
+  appDescription: "Din AI-assistent for bibellesing og søk",
 
   // Navigation
   back: "Tilbake",
@@ -441,7 +441,7 @@ const no: Translations = {
   next: "Neste",
 
   // PWA Install Prompt
-  installApp: "Installer Skriften",
+  installApp: "Installer Bible AI",
   installDescription: "Installer appen for offline lesing og en bedre opplevelse.",
   install: "Installer",
   notNow: "Ikke nå",
@@ -473,7 +473,7 @@ const no: Translations = {
   preview: "Forhåndsvisning",
   previewText: "I begynnelsen skapte Gud himmelen og jorden.",
   about: "Om",
-  aboutDescription: "Skriften er en minimal, åpen kildekode bibelleser-app med fokus på ren leseopplevelse og enkel navigasjon.",
+  aboutDescription: "Bible AI er din AI-assistent for bibellesing og søk. Åpen kildekode, fokus på ren leseopplevelse.",
   version: "Versjon",
   language: "Språk",
 
