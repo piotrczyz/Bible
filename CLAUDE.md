@@ -69,11 +69,13 @@ Bible/
 ├── tsconfig.json          # TypeScript configuration
 ├── components.json        # shadcn/ui configuration
 ├── app/                   # Next.js App Router
-│   ├── api/               # API routes
-│   │   └── search/        # AI-powered verse search endpoint
 │   ├── layout.tsx         # Root layout with providers
 │   ├── page.tsx           # Home page (book/chapter/reader views)
 │   └── globals.css        # Global styles
+├── functions/             # Firebase Cloud Functions
+│   ├── src/index.ts       # Search API endpoint (OpenAI integration)
+│   ├── package.json       # Functions dependencies
+│   └── tsconfig.json      # Functions TypeScript config
 ├── components/            # React components
 │   ├── ui/                # shadcn/ui primitives
 │   ├── ai-search.tsx      # AI-powered verse search overlay
