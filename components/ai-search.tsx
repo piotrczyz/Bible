@@ -6,7 +6,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/components/language-provider"
 import { cn } from "@/lib/utils"
-import type { SearchResult } from "@/app/api/search/route"
+
+interface SearchResult {
+  bookId: string
+  bookName: string
+  chapter: number
+  verse: number
+  text: string
+  confidence: number
+}
 
 interface AISearchProps {
   onNavigate: (bookId: string, chapter: number, verse: number) => void
