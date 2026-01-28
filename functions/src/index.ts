@@ -1,4 +1,4 @@
-import { onRequest, Request, Response } from "firebase-functions/v2/https";
+import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 
 // Define the secret for OpenAI API key
@@ -122,7 +122,7 @@ export const search = onRequest(
     memory: "256MiB",
     timeoutSeconds: 60,
   },
-  async (req: Request, res: Response): Promise<void> => {
+  async (req, res) => {
     // Only allow POST requests
     if (req.method !== "POST") {
       res.status(405).json({ error: "Method not allowed" });
