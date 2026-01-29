@@ -124,7 +124,6 @@ export default function BibleApp() {
           </div>
 
           <div className="flex items-center gap-1">
-            <AISearch onNavigate={handleNavigateFromSearch} />
             <TimelineSheet onNavigate={handleNavigateFromTimeline} />
             <SettingsSheet />
           </div>
@@ -136,6 +135,11 @@ export default function BibleApp() {
         {/* Book Selection View */}
         {view === "books" && (
           <div className="px-4 py-6">
+            {/* AI Search */}
+            <div className="mb-6">
+              <AISearch onNavigate={handleNavigateFromSearch} inline />
+            </div>
+
             {/* Testament Filter */}
             <div className="mb-6 flex gap-2">
               <FilterButton

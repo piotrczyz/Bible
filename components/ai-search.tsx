@@ -18,15 +18,18 @@ interface SearchResult {
 
 interface AISearchProps {
   onNavigate: (bookId: string, chapter: number, verse: number) => void
+  /** Show inline input instead of icon button */
+  inline?: boolean
 }
 
-export function AISearch({ onNavigate }: AISearchProps) {
+export function AISearch({ onNavigate, inline = false }: AISearchProps) {
   const [isExpanded, setIsExpanded] = React.useState(false)
   const [query, setQuery] = React.useState("")
   const [results, setResults] = React.useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const inputRef = React.useRef<HTMLInputElement>(null)
+  const inlineInputRef = React.useRef<HTMLInputElement>(null)
 
   const { t } = useLanguage()
 
@@ -40,6 +43,10 @@ export function AISearch({ onNavigate }: AISearchProps) {
     setQuery("")
     setResults([])
     setError(null)
+  }
+
+  const handleInlineClick = () => {
+    handleExpand()
   }
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -98,6 +105,27 @@ export function AISearch({ onNavigate }: AISearchProps) {
   }, [isExpanded])
 
   if (!isExpanded) {
+    // Inline mode: show search input directly
+    if (inline) {
+      return (
+        <div
+          className="relative cursor-text"
+          onClick={handleInlineClick}
+        >
+          <Sparkles className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            ref={inlineInputRef}
+            type="text"
+            readOnly
+            placeholder={t.aiSearchPlaceholder}
+            className="pl-10 pr-4 h-11 cursor-text"
+            onFocus={handleInlineClick}
+          />
+        </div>
+      )
+    }
+
+    // Icon button mode (for header)
     return (
       <Button
         variant="ghost"
