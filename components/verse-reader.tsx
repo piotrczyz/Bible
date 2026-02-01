@@ -211,10 +211,10 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
                   onClick={() => handleVerseClick(verseNumber)}
                   className={cn(
                     "font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-all duration-300",
-                    // Unselected: grey background + faded text indicating tappable
-                    !isSelected && "bg-secondary/40 text-foreground/50 hover:bg-secondary/50 hover:text-foreground/60 active:bg-secondary/60",
-                    // Selected: clear background + full text color, shows it's been marked as read
-                    isSelected && "bg-transparent text-foreground hover:bg-secondary/20",
+                    // Unselected: grey background indicating tappable
+                    !isSelected && "bg-secondary/40 hover:bg-secondary/50 active:bg-secondary/60",
+                    // Selected: clear background, shows it's been marked as read
+                    isSelected && "bg-transparent hover:bg-secondary/20",
                     // Search highlight animation
                     highlightedVerse === verseNumber && "bg-primary/20 ring-2 ring-primary/30 animate-pulse"
                   )}
@@ -222,7 +222,13 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
                   <sup className="text-xs font-sans text-muted-foreground select-none mr-1">
                     {verseNumber}
                   </sup>
-                  {verse}
+                  <span className={cn(
+                    "transition-opacity duration-300",
+                    !isSelected && "opacity-50",
+                    isSelected && "opacity-100"
+                  )}>
+                    {verse}
+                  </span>
                 </p>
               )
             })}
