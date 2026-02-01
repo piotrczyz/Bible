@@ -10,6 +10,7 @@ import { SettingsSheet } from "@/components/settings-sheet"
 import { TimelineSheet } from "@/components/timeline-sheet"
 import { AISearch } from "@/components/ai-search"
 import { useLanguage } from "@/components/language-provider"
+import { useScrollDirection } from "@/hooks/use-scroll-direction"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Home } from "lucide-react"
 import { ScriptureIcon } from "@/components/scripture-icon"
@@ -25,6 +26,7 @@ export default function BibleApp() {
   const [initialVerse, setInitialVerse] = React.useState<number | undefined>(undefined)
   const [filter, setFilter] = React.useState<TestamentFilter>("all")
   const { t } = useLanguage()
+  const { isVisible: barsVisible } = useScrollDirection({ threshold: 10 })
 
   const handleSelectBook = (book: Book) => {
     setSelectedBook(book)
@@ -87,7 +89,13 @@ export default function BibleApp() {
   return (
     <div className="min-h-dvh bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80 pt-[env(safe-area-inset-top)]">
+      <header
+        className={cn(
+          "sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80 pt-[env(safe-area-inset-top)]",
+          "transition-transform duration-300 ease-in-out",
+          !barsVisible && "-translate-y-full"
+        )}
+      >
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
           <div className="flex items-center gap-2">
             {view !== "books" && (
@@ -173,7 +181,13 @@ export default function BibleApp() {
             </div>
 
             {/* Bottom Navigation */}
-            <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)]">
+            <div
+              className={cn(
+                "fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)]",
+                "transition-transform duration-300 ease-in-out",
+                !barsVisible && "translate-y-full"
+              )}
+            >
               <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
                 <Button
                   variant="ghost"

@@ -6,6 +6,7 @@ import { useSettings } from "@/components/settings-provider"
 import { useLanguage } from "@/components/language-provider"
 import { useReadingHistory } from "@/components/reading-history-provider"
 import { useVerses } from "@/hooks/use-verses"
+import { useScrollDirection } from "@/hooks/use-scroll-direction"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ChevronLeft, ChevronRight, Home, CheckCheck, Check } from "lucide-react"
@@ -31,6 +32,7 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
     resetSelection,
   } = useReadingHistory()
   const { verses, isLoading, error } = useVerses(versionId, book.id, chapter)
+  const { isVisible: barsVisible } = useScrollDirection({ threshold: 10 })
 
   // Track highlighted verse from search (with fade-out animation)
   const [highlightedVerse, setHighlightedVerse] = useState<number | null>(null)
@@ -229,7 +231,13 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
       </article>
 
       {/* Chapter Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)]">
+      <div
+        className={cn(
+          "fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)]",
+          "transition-transform duration-300 ease-in-out",
+          !barsVisible && "translate-y-full"
+        )}
+      >
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
           <Button
             variant="ghost"
