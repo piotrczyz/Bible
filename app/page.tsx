@@ -20,6 +20,15 @@ import { cn } from "@/lib/utils"
 type View = "books" | "chapters" | "reader"
 type TestamentFilter = "all" | "old" | "new"
 
+const NAV_STATE_KEY = "bible-nav-state"
+
+interface NavState {
+  view: View
+  bookId: string | null
+  chapter: number
+  filter: TestamentFilter
+}
+
 export default function BibleApp() {
   const [view, setView] = React.useState<View>("books")
   const [selectedBook, setSelectedBook] = React.useState<Book | null>(null)
@@ -28,6 +37,41 @@ export default function BibleApp() {
   const [filter, setFilter] = React.useState<TestamentFilter>("all")
   const { t } = useLanguage()
   const { isVisible: barsVisible } = useScrollDirection({ threshold: 10 })
+
+  // Restore navigation state on mount (for pull-to-refresh)
+  React.useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(NAV_STATE_KEY)
+      if (saved) {
+        const state: NavState = JSON.parse(saved)
+        setView(state.view)
+        setFilter(state.filter)
+        setSelectedChapter(state.chapter)
+        if (state.bookId) {
+          const book = getBook(state.bookId)
+          if (book) {
+            setSelectedBook(book)
+          }
+        }
+        // Clear after restoring so normal navigation starts fresh
+        sessionStorage.removeItem(NAV_STATE_KEY)
+      }
+    } catch {
+      // Ignore errors reading sessionStorage
+    }
+  }, [])
+
+  // Save state before refresh
+  const handleRefresh = React.useCallback(() => {
+    const state: NavState = {
+      view,
+      bookId: selectedBook?.id ?? null,
+      chapter: selectedChapter,
+      filter,
+    }
+    sessionStorage.setItem(NAV_STATE_KEY, JSON.stringify(state))
+    window.location.reload()
+  }, [view, selectedBook, selectedChapter, filter])
 
   const handleSelectBook = (book: Book) => {
     setSelectedBook(book)
@@ -88,7 +132,7 @@ export default function BibleApp() {
   }
 
   return (
-    <PullToRefresh>
+    <PullToRefresh onRefresh={handleRefresh}>
       <div className="min-h-dvh bg-background">
         {/* Header */}
         <header
