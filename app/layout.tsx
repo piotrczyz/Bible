@@ -15,14 +15,14 @@ const _geist = Geist({ subsets: ["latin"] });
 const _lora = Lora({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Bible AI - Your AI Assistant in Reading',
-  description: 'Your AI assistant for Bible reading and search',
+  title: 'Bible - Your Reading Assistant',
+  description: 'Your assistant for Bible reading and search',
   generator: 'v0.app',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Bible AI',
+    title: 'Bible',
   },
   icons: {
     icon: [
