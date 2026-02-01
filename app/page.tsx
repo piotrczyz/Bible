@@ -9,6 +9,7 @@ import { VerseReader } from "@/components/verse-reader"
 import { SettingsSheet } from "@/components/settings-sheet"
 import { TimelineSheet } from "@/components/timeline-sheet"
 import { AISearch } from "@/components/ai-search"
+import { PullToRefresh } from "@/components/pull-to-refresh"
 import { useLanguage } from "@/components/language-provider"
 import { useScrollDirection } from "@/hooks/use-scroll-direction"
 import { Button } from "@/components/ui/button"
@@ -87,9 +88,10 @@ export default function BibleApp() {
   }
 
   return (
-    <div className="min-h-dvh bg-background">
-      {/* Header */}
-      <header
+    <PullToRefresh>
+      <div className="min-h-dvh bg-background">
+        {/* Header */}
+        <header
         className={cn(
           "sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80 pt-[env(safe-area-inset-top)]",
           "transition-transform duration-300 ease-in-out",
@@ -229,7 +231,8 @@ export default function BibleApp() {
           />
         )}
       </main>
-    </div>
+      </div>
+    </PullToRefresh>
   )
 }
 
