@@ -210,11 +210,11 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
                   id={`verse-${verseNumber}`}
                   onClick={() => handleVerseClick(verseNumber)}
                   className={cn(
-                    "font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-all duration-300",
+                    "font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-all duration-200",
                     // Unselected: grey background indicating tappable
-                    !isSelected && "bg-secondary/40 hover:bg-secondary/50 active:bg-secondary/60",
-                    // Selected: clear background, shows it's been marked as read
-                    isSelected && "bg-transparent hover:bg-secondary/20",
+                    !isSelected && "bg-secondary/40 hover:bg-secondary/50 active:bg-secondary/60 active:scale-[0.99]",
+                    // Selected: clear background with pop animation
+                    isSelected && "bg-transparent hover:bg-secondary/20 animate-[select_0.2s_ease-out]",
                     // Search highlight animation
                     highlightedVerse === verseNumber && "bg-primary/20 ring-2 ring-primary/30 animate-pulse"
                   )}
@@ -223,9 +223,11 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
                     {verseNumber}
                   </sup>
                   <span className={cn(
-                    "transition-opacity duration-300",
-                    !isSelected && "opacity-50",
-                    isSelected && "opacity-100"
+                    "transition-colors duration-200",
+                    // Unselected: grey text
+                    !isSelected && "text-gray-400 dark:text-gray-500",
+                    // Selected: full color text
+                    isSelected && "text-foreground"
                   )}>
                     {verse}
                   </span>
