@@ -222,13 +222,10 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
                   <sup className="text-xs font-sans text-muted-foreground select-none mr-1">
                     {verseNumber}
                   </sup>
-                  <span className={cn(
-                    "transition-colors duration-200",
-                    // Unselected: grey text
-                    !isSelected && "text-gray-400 dark:text-gray-500",
-                    // Selected: full color text
-                    isSelected && "text-foreground"
-                  )}>
+                  <span
+                    className="transition-[color] duration-200"
+                    style={{ color: isSelected ? 'var(--foreground)' : '#9ca3af' }}
+                  >
                     {verse}
                   </span>
                 </p>
