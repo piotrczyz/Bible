@@ -39,26 +39,26 @@ export function PullToRefresh({
 
   return (
     <div className={cn("relative", className)}>
-      {/* Pull indicator */}
+      {/* Pull indicator - positioned below iOS safe area */}
       <div
         className={cn(
-          "pointer-events-none absolute left-0 right-0 flex items-start justify-center overflow-hidden transition-opacity duration-200",
+          "pointer-events-none fixed left-0 right-0 flex justify-center transition-opacity duration-200",
           showIndicator ? "opacity-100" : "opacity-0"
         )}
         style={{
-          top: 0,
-          height: pullDistance,
+          top: "env(safe-area-inset-top, 0px)",
           zIndex: 100,
         }}
       >
         <div
           className={cn(
-            "mt-2 flex h-10 w-10 items-center justify-center rounded-full bg-background shadow-lg border border-border transition-all duration-200",
+            "flex h-10 w-10 items-center justify-center rounded-full bg-background shadow-lg border border-border transition-all duration-200",
             isThresholdReached && !isRefreshing && "scale-110",
             isRefreshing && "scale-100"
           )}
           style={{
-            transform: `translateY(${Math.max(0, pullDistance - 48)}px)`,
+            transform: `translateY(${Math.max(8, pullDistance - 32)}px)`,
+            opacity: Math.min(1, pullDistance / 40),
           }}
         >
           {isRefreshing ? (
