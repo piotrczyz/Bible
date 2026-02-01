@@ -9,7 +9,7 @@ import { useVerses } from "@/hooks/use-verses"
 import { useScrollDirection } from "@/hooks/use-scroll-direction"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ChevronLeft, ChevronRight, Home, CheckCheck, Check } from "lucide-react"
+import { ChevronLeft, ChevronRight, Home, CheckCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface VerseReaderProps {
@@ -210,19 +210,24 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
                   id={`verse-${verseNumber}`}
                   onClick={() => handleVerseClick(verseNumber)}
                   className={cn(
-                    "font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-all duration-1000 hover:bg-secondary/30 active:bg-secondary/50",
+                    "font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-all duration-200",
+                    // Unselected: grey background indicating tappable
+                    !isSelected && "bg-secondary/40 hover:bg-secondary/50 active:bg-secondary/60 active:scale-[0.99]",
+                    // Selected: clear background with pop animation
+                    isSelected && "bg-transparent hover:bg-secondary/20 animate-[select_0.2s_ease-out]",
+                    // Search highlight animation
                     highlightedVerse === verseNumber && "bg-primary/20 ring-2 ring-primary/30 animate-pulse"
                   )}
                 >
-                  <span className="inline-flex items-baseline gap-1 mr-1">
-                    <sup className="text-xs font-sans text-muted-foreground select-none">
-                      {verseNumber}
-                    </sup>
-                    {isSelected && (
-                      <Check className="inline-block h-3 w-3 text-primary translate-y-[-2px]" />
-                    )}
+                  <sup className="text-xs font-sans text-muted-foreground select-none mr-1">
+                    {verseNumber}
+                  </sup>
+                  <span
+                    className="transition-[color] duration-200"
+                    style={{ color: isSelected ? 'var(--foreground)' : '#9ca3af' }}
+                  >
+                    {verse}
                   </span>
-                  {verse}
                 </p>
               )
             })}
