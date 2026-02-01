@@ -161,8 +161,8 @@ export interface Translations {
 
 const en: Translations = {
   // App
-  appTitle: "Bible AI",
-  appDescription: "Your AI assistant for Bible reading and search",
+  appTitle: "Bible",
+  appDescription: "Your reading assistant",
 
   // Navigation
   back: "Back",
@@ -171,7 +171,7 @@ const en: Translations = {
   next: "Next",
 
   // PWA Install Prompt
-  installApp: "Install Bible AI",
+  installApp: "Install Bible",
   installDescription: "Install the app for offline reading and a better experience.",
   install: "Install",
   notNow: "Not now",
@@ -203,7 +203,7 @@ const en: Translations = {
   preview: "Preview",
   previewText: "In the beginning God created the heaven and the earth.",
   about: "About",
-  aboutDescription: "Bible AI is your AI assistant for Bible reading and search. Open source, focused on clean reading experience.",
+  aboutDescription: "Bible is your reading assistant. Open source, focused on clean reading experience.",
   version: "Version",
   language: "Language",
 
@@ -227,10 +227,10 @@ const en: Translations = {
   markAllUnread: "Mark all unread",
   save: "Save",
 
-  // AI Search
-  aiSearch: "AI Search",
+  // Search
+  aiSearch: "Search",
   aiSearchPlaceholder: "Describe the verse you're looking for...",
-  aiSearchInstructions: "Describe a Bible verse in your own words. You don't need to remember the exact text - just describe what it's about and AI will find it for you.",
+  aiSearchInstructions: "Describe a Bible verse in your own words. You don't need to remember the exact text - just describe what it's about and we'll find it for you.",
   aiSearchNoResults: "No matching verses found. Try describing the verse differently.",
   aiSearchError: "Search failed. Please try again later.",
   searching: "Searching...",
@@ -308,8 +308,8 @@ const en: Translations = {
 
 const pl: Translations = {
   // App
-  appTitle: "Bible AI",
-  appDescription: "Twój asystent AI do czytania i wyszukiwania w Biblii",
+  appTitle: "Biblia",
+  appDescription: "Twój asystent do czytania",
 
   // Navigation
   back: "Wstecz",
@@ -318,7 +318,7 @@ const pl: Translations = {
   next: "Nast.",
 
   // PWA Install Prompt
-  installApp: "Zainstaluj Bible AI",
+  installApp: "Zainstaluj Biblię",
   installDescription: "Zainstaluj aplikację, aby czytać offline i mieć lepsze doświadczenie.",
   install: "Zainstaluj",
   notNow: "Nie teraz",
@@ -350,7 +350,7 @@ const pl: Translations = {
   preview: "Podgląd",
   previewText: "Na początku stworzył Bóg niebo i ziemię.",
   about: "O aplikacji",
-  aboutDescription: "Bible AI to Twój asystent AI do czytania i wyszukiwania w Biblii. Open source, skupiona na czystym doświadczeniu czytania.",
+  aboutDescription: "Biblia to Twój asystent do czytania. Open source, skupiona na czystym doświadczeniu czytania.",
   version: "Wersja",
   language: "Język",
 
@@ -374,10 +374,10 @@ const pl: Translations = {
   markAllUnread: "Oznacz wszystko jako nieprzeczytane",
   save: "Zapisz",
 
-  // AI Search
-  aiSearch: "Wyszukiwanie AI",
+  // Search
+  aiSearch: "Wyszukiwanie",
   aiSearchPlaceholder: "Opisz werset, którego szukasz...",
-  aiSearchInstructions: "Opisz werset biblijny własnymi słowami. Nie musisz pamiętać dokładnego tekstu - wystarczy opisać, o czym jest, a AI znajdzie go za Ciebie.",
+  aiSearchInstructions: "Opisz werset biblijny własnymi słowami. Nie musisz pamiętać dokładnego tekstu - wystarczy opisać, o czym jest, a znajdziemy go za Ciebie.",
   aiSearchNoResults: "Nie znaleziono pasujących wersetów. Spróbuj opisać werset inaczej.",
   aiSearchError: "Wyszukiwanie nie powiodło się. Spróbuj ponownie później.",
   searching: "Szukam...",
@@ -455,8 +455,8 @@ const pl: Translations = {
 
 const no: Translations = {
   // App
-  appTitle: "Bible AI",
-  appDescription: "Din AI-assistent for bibellesing og søk",
+  appTitle: "Bibelen",
+  appDescription: "Din leseassistent",
 
   // Navigation
   back: "Tilbake",
@@ -465,7 +465,7 @@ const no: Translations = {
   next: "Neste",
 
   // PWA Install Prompt
-  installApp: "Installer Bible AI",
+  installApp: "Installer Bibelen",
   installDescription: "Installer appen for offline lesing og en bedre opplevelse.",
   install: "Installer",
   notNow: "Ikke nå",
@@ -497,7 +497,7 @@ const no: Translations = {
   preview: "Forhåndsvisning",
   previewText: "I begynnelsen skapte Gud himmelen og jorden.",
   about: "Om",
-  aboutDescription: "Bible AI er din AI-assistent for bibellesing og søk. Åpen kildekode, fokus på ren leseopplevelse.",
+  aboutDescription: "Bibelen er din leseassistent. Åpen kildekode, fokus på ren leseopplevelse.",
   version: "Versjon",
   language: "Språk",
 
@@ -521,10 +521,10 @@ const no: Translations = {
   markAllUnread: "Merk alle som ulest",
   save: "Lagre",
 
-  // AI Search
-  aiSearch: "AI-søk",
+  // Search
+  aiSearch: "Søk",
   aiSearchPlaceholder: "Beskriv verset du leter etter...",
-  aiSearchInstructions: "Beskriv et bibelvers med egne ord. Du trenger ikke huske den nøyaktige teksten - bare beskriv hva det handler om, så finner AI det for deg.",
+  aiSearchInstructions: "Beskriv et bibelvers med egne ord. Du trenger ikke huske den nøyaktige teksten - bare beskriv hva det handler om, så finner vi det for deg.",
   aiSearchNoResults: "Ingen matchende vers funnet. Prøv å beskrive verset annerledes.",
   aiSearchError: "Søket mislyktes. Vennligst prøv igjen senere.",
   searching: "Søker...",

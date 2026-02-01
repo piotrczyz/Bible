@@ -1,7 +1,7 @@
 {
-  "name": "Bible AI - Your AI Assistant in Reading",
-  "short_name": "Bible AI",
-  "description": "Your AI assistant for Bible reading and search",
+  "name": "Bible - Your Reading Assistant",
+  "short_name": "Bible",
+  "description": "Your assistant for Bible reading and search",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
