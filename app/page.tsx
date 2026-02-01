@@ -132,7 +132,9 @@ export default function BibleApp() {
           </div>
 
           <div className="flex items-center gap-1">
-            <AISearch onNavigate={handleNavigateFromSearch} />
+            <div className="hidden">
+              <AISearch onNavigate={handleNavigateFromSearch} />
+            </div>
             <TimelineSheet onNavigate={handleNavigateFromTimeline} />
             <SettingsSheet />
           </div>
