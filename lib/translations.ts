@@ -318,7 +318,7 @@ const pl: Translations = {
   next: "Nast.",
 
   // PWA Install Prompt
-  installApp: "Zainstaluj Biblię",
+  installApp: "Zainstaluj asystenta",
   installDescription: "Zainstaluj aplikację, aby czytać offline i mieć lepsze doświadczenie.",
   install: "Zainstaluj",
   notNow: "Nie teraz",
