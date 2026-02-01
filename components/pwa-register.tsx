@@ -16,7 +16,7 @@ export function PWARegister() {
           scope: '/',
         })
 
-        console.log('[PWA] Service worker registered:', registration.scope)
+        // Service worker registered successfully
 
         // Check for updates
         registration.addEventListener('updatefound', () => {
@@ -26,7 +26,7 @@ export function PWARegister() {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 // New version available
                 setUpdateAvailable(true)
-                console.log('[PWA] New version available')
+                // New version available
               }
             })
           }
