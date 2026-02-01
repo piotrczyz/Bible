@@ -13,7 +13,7 @@ import { PullToRefresh } from "@/components/pull-to-refresh"
 import { useLanguage } from "@/components/language-provider"
 import { useScrollDirection } from "@/hooks/use-scroll-direction"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, Home } from "lucide-react"
+import { ChevronLeft, Home } from "lucide-react"
 import { ScriptureIcon } from "@/components/scripture-icon"
 import { cn } from "@/lib/utils"
 

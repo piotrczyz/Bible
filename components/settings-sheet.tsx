@@ -23,7 +23,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
-import { Input } from "@/components/ui/input"
 import { Settings, Sun, Moon, Monitor, Book, Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getAvailableLanguages } from "@/lib/bible-versions"
