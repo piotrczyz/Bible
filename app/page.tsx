@@ -2,12 +2,18 @@
 
 import * as React from "react"
 import { type Book, getBook } from "@/lib/bible-data"
+import { formatString } from "@/lib/translations"
 import { BookList } from "@/components/book-list"
 import { ChapterGrid } from "@/components/chapter-grid"
 import { VerseReader } from "@/components/verse-reader"
 import { SettingsSheet } from "@/components/settings-sheet"
+import { TimelineSheet } from "@/components/timeline-sheet"
+import { AISearch } from "@/components/ai-search"
+import { useLanguage } from "@/components/language-provider"
+import { useScrollDirection } from "@/hooks/use-scroll-direction"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, BookOpen } from "lucide-react"
+import { ChevronLeft, ChevronRight, Home } from "lucide-react"
+import { ScriptureIcon } from "@/components/scripture-icon"
 import { cn } from "@/lib/utils"
 
 type View = "books" | "chapters" | "reader"
@@ -17,7 +23,10 @@ export default function BibleApp() {
   const [view, setView] = React.useState<View>("books")
   const [selectedBook, setSelectedBook] = React.useState<Book | null>(null)
   const [selectedChapter, setSelectedChapter] = React.useState<number>(1)
+  const [initialVerse, setInitialVerse] = React.useState<number | undefined>(undefined)
   const [filter, setFilter] = React.useState<TestamentFilter>("all")
+  const { t } = useLanguage()
+  const { isVisible: barsVisible } = useScrollDirection({ threshold: 10 })
 
   const handleSelectBook = (book: Book) => {
     setSelectedBook(book)
@@ -26,6 +35,7 @@ export default function BibleApp() {
 
   const handleSelectChapter = (chapter: number) => {
     setSelectedChapter(chapter)
+    setInitialVerse(undefined) // Clear initial verse for normal navigation
     setView("reader")
   }
 
@@ -34,6 +44,26 @@ export default function BibleApp() {
     if (book) {
       setSelectedBook(book)
       setSelectedChapter(chapter)
+    }
+  }
+
+  const handleNavigateFromTimeline = (bookId: string, chapter: number) => {
+    const book = getBook(bookId)
+    if (book) {
+      setSelectedBook(book)
+      setSelectedChapter(chapter)
+      setInitialVerse(undefined)
+      setView("reader")
+    }
+  }
+
+  const handleNavigateFromSearch = (bookId: string, chapter: number, verse: number) => {
+    const book = getBook(bookId)
+    if (book) {
+      setSelectedBook(book)
+      setSelectedChapter(chapter)
+      setInitialVerse(verse)
+      setView("reader")
     }
   }
 
@@ -46,10 +76,26 @@ export default function BibleApp() {
     }
   }
 
+  const handleHome = () => {
+    setView("books")
+    setSelectedBook(null)
+  }
+
+  // Get translated book name
+  const getBookName = (book: Book) => {
+    return t.books[book.id as keyof typeof t.books] || book.name
+  }
+
   return (
     <div className="min-h-dvh bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80">
+      <header
+        className={cn(
+          "sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80 pt-[env(safe-area-inset-top)]",
+          "transition-transform duration-300 ease-in-out",
+          !barsVisible && "-translate-y-full"
+        )}
+      >
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
           <div className="flex items-center gap-2">
             {view !== "books" && (
@@ -60,32 +106,38 @@ export default function BibleApp() {
                 className="h-9 w-9"
               >
                 <ChevronLeft className="h-5 w-5" />
-                <span className="sr-only">Back</span>
+                <span className="sr-only">{t.back}</span>
               </Button>
             )}
-            
+
             {view === "books" && (
               <div className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
-                <h1 className="text-lg font-semibold">Scripture</h1>
+                <ScriptureIcon className="h-5 w-5" />
+                <h1 className="text-lg font-semibold">{t.appTitle}</h1>
               </div>
             )}
-            
+
             {view === "chapters" && selectedBook && (
-              <h1 className="text-lg font-semibold">{selectedBook.name}</h1>
+              <h1 className="text-lg font-semibold">{getBookName(selectedBook)}</h1>
             )}
-            
+
             {view === "reader" && selectedBook && (
               <button
                 onClick={() => setView("chapters")}
                 className="text-lg font-semibold hover:underline underline-offset-4"
               >
-                {selectedBook.name} {selectedChapter}
+                {getBookName(selectedBook)} {selectedChapter}
               </button>
             )}
           </div>
 
-          <SettingsSheet />
+          <div className="flex items-center gap-1">
+            <div className="hidden">
+              <AISearch onNavigate={handleNavigateFromSearch} />
+            </div>
+            <TimelineSheet onNavigate={handleNavigateFromTimeline} />
+            <SettingsSheet />
+          </div>
         </div>
       </header>
 
@@ -100,19 +152,19 @@ export default function BibleApp() {
                 active={filter === "all"}
                 onClick={() => setFilter("all")}
               >
-                All
+                {t.all}
               </FilterButton>
               <FilterButton
                 active={filter === "old"}
                 onClick={() => setFilter("old")}
               >
-                Old Testament
+                {t.oldTestament}
               </FilterButton>
               <FilterButton
                 active={filter === "new"}
                 onClick={() => setFilter("new")}
               >
-                New Testament
+                {t.newTestament}
               </FilterButton>
             </div>
 
@@ -122,12 +174,48 @@ export default function BibleApp() {
 
         {/* Chapter Selection View */}
         {view === "chapters" && selectedBook && (
-          <div className="px-4 py-6">
-            <p className="mb-4 text-sm text-muted-foreground">
-              {selectedBook.chapters} chapters
-            </p>
-            <ChapterGrid book={selectedBook} onSelectChapter={handleSelectChapter} />
-          </div>
+          <>
+            <div className="px-4 py-6 pb-24">
+              <p className="mb-4 text-sm text-muted-foreground">
+                {formatString(t.chaptersCount, { count: selectedBook.chapters })}
+              </p>
+              <ChapterGrid book={selectedBook} onSelectChapter={handleSelectChapter} />
+            </div>
+
+            {/* Bottom Navigation */}
+            <div
+              className={cn(
+                "fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)]",
+                "transition-transform duration-300 ease-in-out",
+                !barsVisible && "translate-y-full"
+              )}
+            >
+              <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBack}
+                  className="gap-1 text-muted-foreground hover:text-foreground"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="sm:hidden">{t.back}</span>
+                  <span className="hidden sm:inline">{t.back}</span>
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleHome}
+                  className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                >
+                  <Home className="h-5 w-5" />
+                  <span className="sr-only">{t.home}</span>
+                </Button>
+
+                <div className="w-[68px]" />
+              </div>
+            </div>
+          </>
         )}
 
         {/* Reader View */}
@@ -136,6 +224,8 @@ export default function BibleApp() {
             book={selectedBook}
             chapter={selectedChapter}
             onNavigate={handleNavigate}
+            onHome={handleHome}
+            initialVerse={initialVerse}
           />
         )}
       </main>

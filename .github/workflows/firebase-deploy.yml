@@ -1,0 +1,81 @@
+name: Deploy to Firebase
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web app
+        run: pnpm run build
+
+      # TODO: Re-enable when Firebase Functions deployment is properly configured
+      # - name: Install functions dependencies
+      #   run: cd functions && npm install
+
+      # - name: Build functions
+      #   run: cd functions && npm run build
+
+      - name: Deploy to Firebase Hosting (Preview)
+        if: github.event_name == 'pull_request'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          expires: 7d
+
+      # TODO: Re-enable Firebase Functions deployment when properly configured
+      # - name: Set Firebase Functions secrets
+      #   if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+      #   run: |
+      #     echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/firebase-sa.json
+      #     export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
+      #     npx firebase-tools functions:secrets:set OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" --project ${{ secrets.FIREBASE_PROJECT_ID }} --force
+      #   continue-on-error: true
+
+      # - name: Deploy Functions (Production)
+      #   if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+      #   run: |
+      #     echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/firebase-sa.json
+      #     export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
+      #     npx firebase-tools deploy --only functions --project ${{ secrets.FIREBASE_PROJECT_ID }} --non-interactive
+
+      - name: Deploy to Firebase Hosting (Production)
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
