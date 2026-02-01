@@ -77,7 +77,7 @@ Bible/
 │   ├── package.json       # Functions dependencies
 │   └── tsconfig.json      # Functions TypeScript config
 ├── components/            # React components
-│   ├── ui/                # shadcn/ui primitives
+│   ├── ui/                # shadcn/ui primitives (60+ components)
 │   ├── ai-search.tsx      # AI-powered verse search overlay
 │   ├── book-list.tsx      # Book selection grid
 │   ├── chapter-grid.tsx   # Chapter selection grid
@@ -94,15 +94,31 @@ Bible/
 │   ├── bible-versions.ts  # Bible version definitions
 │   ├── translations.ts    # i18n (English, Polish, Norwegian)
 │   ├── reading-history.ts # Reading analytics types/utilities
-│   └── utils.ts           # Tailwind utilities
+│   └── utils.ts           # Tailwind utilities (cn helper)
 ├── hooks/                 # Custom React hooks
+│   ├── use-mobile.ts      # Mobile breakpoint detection
+│   ├── use-toast.ts       # Toast notification system
 │   └── use-verses.ts      # Async verse loading hook
 ├── public/                # Static assets
 │   └── bibles/            # Bible JSON files (KJV, ASV, WEB, BG, UBG)
+├── docs/                  # Documentation
+│   └── UI_GENERATION_PROMPT.md  # Figma Make design prompt
 ├── ios/                   # iOS native project (Capacitor-generated)
 ├── android/               # Android native project (Capacitor-generated)
 └── __tests__/             # Test files
 ```
+
+### Current Implementation Status
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Book navigation | Complete | 66 books, OT/NT filters |
+| Chapter selection | Complete | Dynamic grid based on book |
+| Verse reader | Partial | Sample verses only (Genesis 1, John 1, Psalm 23) |
+| Theme toggle | Complete | Light/Dark/System modes |
+| Font size | Complete | 14-24px with localStorage persistence |
+| Capacitor | Not started | ios/ and android/ folders not initialized |
+| Testing | Not started | No test files or configuration |
 
 ## Development Workflow
 
@@ -505,16 +521,15 @@ npx cap run ios
 npx cap run android
 ```
 
-### Testing
+### Testing (Not Yet Configured)
 ```bash
-# Run all tests
-npm test
+# Testing infrastructure to be added when needed
+# Recommended: Vitest or Jest with React Testing Library
 
-# Run tests in watch mode
-npm run test:watch
-
-# Run tests with coverage
-npm run test:coverage
+# Future commands:
+# npm test              # Run all tests
+# npm run test:watch    # Watch mode
+# npm run test:coverage # Coverage report
 ```
 
 ### Linting
