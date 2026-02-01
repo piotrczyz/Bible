@@ -211,8 +211,8 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
                   onClick={() => handleVerseClick(verseNumber)}
                   className={cn(
                     "font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-all duration-300",
-                    // Unselected: grey background + muted text indicating tappable
-                    !isSelected && "bg-secondary/40 text-muted-foreground hover:bg-secondary/50 active:bg-secondary/60",
+                    // Unselected: grey background + faded text indicating tappable
+                    !isSelected && "bg-secondary/40 text-foreground/50 hover:bg-secondary/50 hover:text-foreground/60 active:bg-secondary/60",
                     // Selected: clear background + full text color, shows it's been marked as read
                     isSelected && "bg-transparent text-foreground hover:bg-secondary/20",
                     // Search highlight animation
