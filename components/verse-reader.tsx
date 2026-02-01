@@ -229,7 +229,7 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
       </article>
 
       {/* Chapter Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80">
+      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)]">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
           <Button
             variant="ghost"
