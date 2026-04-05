@@ -12,6 +12,7 @@ import { AISearch } from "@/components/ai-search"
 import { PullToRefresh } from "@/components/pull-to-refresh"
 import { useLanguage } from "@/components/language-provider"
 import { useScrollDirection } from "@/hooks/use-scroll-direction"
+import { useWakeLock } from "@/hooks/use-wake-lock"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, Home } from "lucide-react"
 import { ScriptureIcon } from "@/components/scripture-icon"
@@ -37,6 +38,7 @@ export default function BibleApp() {
   const [filter, setFilter] = React.useState<TestamentFilter>("all")
   const { t } = useLanguage()
   const { isVisible: barsVisible } = useScrollDirection({ threshold: 10 })
+  useWakeLock()
 
   // Restore navigation state on mount (for pull-to-refresh)
   React.useEffect(() => {
