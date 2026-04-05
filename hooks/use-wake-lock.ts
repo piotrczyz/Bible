@@ -1,12 +1,13 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useCallback } from "react"
 
-// Tiny 0-second silent MP4 video (base64-encoded) used to prevent
-// iOS from dimming the screen. Playing a looping video tricks the OS
-// into thinking media is active, keeping the display awake.
+// Minimal silent MP4 with both video and audio tracks.
+// Source: NoSleep.js (MIT license) — https://github.com/richtr/NoSleep.js
+// This is a tiny valid MP4 that iOS recognizes as media playback,
+// preventing the screen from dimming.
 const SILENT_MP4 =
-  "data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAu1tZGF0AAACrQYF//+p3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE1MiByMjg1NCBlOWE1OTAzIC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAxNyAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MSBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0tMiB0aHJlYWRzPTMgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTI1IHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMAAAAAAPZYiEAD//8m+P5OXfBeLGOfKE3xkODvFZuBflq/AAAAHMYXV0bwAAAA9IYW5kbGVyAAAAAE1ldGEAAAAAAAAgc3R0cwAAAAAAAAACAAAAAgAAAAEAAAABAAAAFAAAABBjdHRzAAAAAAAAAAIAAAABAAAAAQAAAAEAAAAcc3RzYwAAAAAAAAABAAAAAQAAAAIAAAABAAAAFHN0c3oAAAAAAAAAAAAAAAACAAAAFHN0Y28AAAAAAAAAAAEAAAA0AAAAYXVkdHMAAAAAAAAhc3R0cwAAAAAAAAABAAAAAgAAAAEAAAAcc3RzYwAAAAAAAAABAAAAAQAAAAEAAAABAAAAFHN0c3oAAAAAAAAAAAAAAAABAAAAFHN0Y28AAAAAAAAAAQAAADQAAAAidWR0YQAAABptZXRhAAAAAAAAACFoZGxyAAAAAE1ldGEAAAEMbXZoZAAAAAAAAAAAAAAAAAAAA+gAAAACAAEAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAABdnRyYWsAAABcdGtoZAAAAA8AAAAAAAAAAAAAAAEAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAABAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAA+G1kaWEAAAAgbWRoZAAAAAAAAAAAAAAAAAAAAAIAAAACVcQAAAAAAC1oZGxyAAAAAAAAAAB2aWRlAAAAAAAAAAAAAAAAVmlkZW9IYW5kbGVyAAAAjG1pbmYAAAAUdm1oZAAAAAEAAAAAAAAAAAAAJGRpbmYAAAAcZHJlZgAAAAAAAAABAAAADHVybCAAAAABAAAATHN0YmwAAAAoc3RzZAAAAAAAAAABAAAAGGF2YzEAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAACAAIASAAAAEgAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABj//wAAAA5jb2xybmNseAABABAAAAB0dHJhawAAAFx0a2hkAAAADwAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAEAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAN1tZGlhAAAAIG1kaGQAAAAAAAAAAAAAAAAAAAACAAAAAlXEAAAAAAAtaGRscgAAAAAAAAAAc291bgAAAAAAAAAAAAAAAFNvdW5kSGFuZGxlcgAAAIhtaW5mAAAAEHNtaGQAAAAAAAAAACRkaW5mAAAAHGRyZWYAAAAAAAAAAQAAAAx1cmwgAAAAAQAAAExzdGJsAAAAKHN0c2QAAAAAAAAAAQAAABhtcDRhAAAAAAAAAAEAAAAAAAAAAAACABAAAAAANC5oZGxyAAAAAE1ldGEA"
+  "data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAAhtZGF0AAAA1m1vb3YAAABsbXZoZAAAAAAAAAAAAAAAAAAD6AAAAAAAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAADF1ZHRhAAAAKW1ldGEAAAAAAAAAIWhkbHIAAAAAAAAAAG1kaXIAAAAAAAAAAAAAAAA="
 
 function isIOS(): boolean {
   if (typeof navigator === "undefined") return false
@@ -19,97 +20,145 @@ function isIOS(): boolean {
 /**
  * Keeps the screen awake while the app is in the foreground.
  *
- * - On browsers that support the Wake Lock API (Chrome, Edge): uses it directly.
- * - On iOS Safari / PWA: plays a tiny silent video on loop as a fallback,
- *   which prevents the OS from dimming the screen.
+ * Strategy:
+ * 1. Try the Wake Lock API first (works in Safari tabs iOS 16.4+,
+ *    PWA mode iOS 18.4+, Chrome 84+, Edge 84+).
+ * 2. If Wake Lock fails or is unavailable (older iOS PWA), fall back
+ *    to playing a tiny silent video on loop (the NoSleep.js technique).
+ *
+ * Both strategies require a user gesture on iOS to activate.
+ * The hook listens for the first tap/click and activates then.
  */
 export function useWakeLock() {
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
+  const enabledRef = useRef(false)
+  const timerId = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const enableWakeLock = useCallback(async () => {
+    if (enabledRef.current) return
+    enabledRef.current = true
+
+    // Try Wake Lock API first
+    const wakeLockAcquired = await tryWakeLockAPI(wakeLockRef)
+    if (wakeLockAcquired) return
+
+    // Fall back to video trick (mainly for iOS PWA on < 18.4)
+    enableVideoWakeLock(videoRef, timerId)
+  }, [])
 
   useEffect(() => {
     if (typeof document === "undefined") return
 
-    const useNativeWakeLock =
-      "wakeLock" in navigator && !isIOS()
+    // Try to enable immediately (works if Wake Lock API is available
+    // and doesn't require gesture, e.g. Chrome desktop)
+    enableWakeLock()
 
-    // --- Native Wake Lock API (non-iOS) ---
-    if (useNativeWakeLock) {
-      async function requestWakeLock() {
-        try {
-          wakeLockRef.current = await navigator.wakeLock.request("screen")
-        } catch {
-          // Can fail (e.g., low battery, background tab)
-        }
-      }
+    // Also enable on first user interaction (required for iOS)
+    function handleInteraction() {
+      enableWakeLock()
+      cleanup()
+    }
 
-      function handleVisibilityChange() {
-        if (document.visibilityState === "visible") {
-          requestWakeLock()
-        }
-      }
+    function cleanup() {
+      document.removeEventListener("touchstart", handleInteraction)
+      document.removeEventListener("click", handleInteraction)
+    }
 
-      requestWakeLock()
-      document.addEventListener("visibilitychange", handleVisibilityChange)
+    document.addEventListener("touchstart", handleInteraction, { once: true })
+    document.addEventListener("click", handleInteraction, { once: true })
 
-      return () => {
-        document.removeEventListener("visibilitychange", handleVisibilityChange)
-        wakeLockRef.current?.release()
-        wakeLockRef.current = null
+    // Re-acquire wake lock when app returns to foreground
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible" && enabledRef.current) {
+        reacquire(wakeLockRef, videoRef, timerId)
       }
     }
 
-    // --- iOS fallback: silent video loop ---
-    if (isIOS()) {
-      const video = document.createElement("video")
-      video.setAttribute("playsinline", "")
-      video.setAttribute("muted", "")
-      video.setAttribute("loop", "")
-      video.muted = true
-      video.style.position = "fixed"
-      video.style.top = "-1px"
-      video.style.left = "-1px"
-      video.style.width = "1px"
-      video.style.height = "1px"
-      video.style.opacity = "0.01"
-      video.src = SILENT_MP4
-      document.body.appendChild(video)
-      videoRef.current = video
+    document.addEventListener("visibilitychange", handleVisibilityChange)
 
-      function playVideo() {
-        video.play().catch(() => {
-          // Autoplay may be blocked until user interaction
-        })
-      }
-
-      function handleVisibilityChange() {
-        if (document.visibilityState === "visible") {
-          playVideo()
-        } else {
-          video.pause()
-        }
-      }
-
-      // Start on first user interaction if autoplay is blocked
-      function handleInteraction() {
-        playVideo()
-        document.removeEventListener("touchstart", handleInteraction)
-        document.removeEventListener("click", handleInteraction)
-      }
-
-      playVideo()
-      document.addEventListener("visibilitychange", handleVisibilityChange)
-      document.addEventListener("touchstart", handleInteraction, { once: true })
-      document.addEventListener("click", handleInteraction, { once: true })
-
-      return () => {
-        document.removeEventListener("visibilitychange", handleVisibilityChange)
-        document.removeEventListener("touchstart", handleInteraction)
-        document.removeEventListener("click", handleInteraction)
-        video.pause()
-        video.remove()
-        videoRef.current = null
-      }
+    return () => {
+      cleanup()
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      wakeLockRef.current?.release()
+      wakeLockRef.current = null
+      videoRef.current?.pause()
+      videoRef.current?.remove()
+      videoRef.current = null
+      if (timerId.current) clearInterval(timerId.current)
+      enabledRef.current = false
     }
-  }, [])
+  }, [enableWakeLock])
+}
+
+type Ref<T> = { current: T }
+
+/** Try the native Wake Lock API. Returns true if acquired. */
+async function tryWakeLockAPI(
+  ref: Ref<WakeLockSentinel | null>
+): Promise<boolean> {
+  if (!("wakeLock" in navigator)) return false
+  try {
+    ref.current = await navigator.wakeLock.request("screen")
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** Create and play a silent video to prevent iOS screen dimming. */
+function enableVideoWakeLock(
+  videoRef: Ref<HTMLVideoElement | null>,
+  timerId: Ref<ReturnType<typeof setInterval> | null>
+) {
+  // Remove any existing video first
+  if (videoRef.current) {
+    videoRef.current.pause()
+    videoRef.current.remove()
+  }
+
+  const video = document.createElement("video")
+  video.setAttribute("playsinline", "")
+  video.setAttribute("loop", "")
+  video.muted = true
+  video.style.position = "fixed"
+  video.style.top = "0"
+  video.style.left = "0"
+  video.style.width = "1px"
+  video.style.height = "1px"
+  video.style.opacity = "0.01"
+  video.style.pointerEvents = "none"
+  video.src = SILENT_MP4
+  document.body.appendChild(video)
+  videoRef.current = video
+
+  video.play().catch(() => {
+    // Will retry on next user interaction via visibilitychange
+  })
+
+  // Periodically nudge the video to keep iOS from ignoring it.
+  // NoSleep.js uses this technique — resetting currentTime prevents
+  // Safari from optimizing away the "idle" video.
+  if (timerId.current) clearInterval(timerId.current)
+  timerId.current = setInterval(() => {
+    if (video && !video.paused && video.readyState >= 2) {
+      video.currentTime = Math.random() * 0.001
+    }
+  }, 500)
+}
+
+/** Re-acquire the wake lock after the app returns to foreground. */
+async function reacquire(
+  wakeLockRef: Ref<WakeLockSentinel | null>,
+  videoRef: Ref<HTMLVideoElement | null>,
+  timerId: Ref<ReturnType<typeof setInterval> | null>
+) {
+  // Try native API first
+  const acquired = await tryWakeLockAPI(wakeLockRef)
+  if (acquired) return
+
+  // Re-enable video fallback — recreate the element for reliability
+  if (isIOS()) {
+    enableVideoWakeLock(videoRef, timerId)
+  }
 }
