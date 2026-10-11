@@ -98,7 +98,7 @@ export function PullToRefresh({
           transform:
             isPulling || isRefreshing
               ? `translateY(${pullDistance}px)`
-              : "translateY(0)",
+              : "none", // a resting transform would break position: fixed in children
         }}
       >
         {children}

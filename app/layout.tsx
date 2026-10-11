@@ -1,7 +1,7 @@
 import React from "react"
 import type { Metadata, Viewport } from 'next'
 import { Geist } from 'next/font/google'
-import { Lora } from 'next/font/google'
+import { Gelasio } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { SettingsProvider } from '@/components/settings-provider'
@@ -12,7 +12,8 @@ import { PWAInstallPrompt } from '@/components/pwa-install-prompt'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
-const _lora = Lora({ subsets: ["latin"] });
+// Gelasio is metric-compatible with Georgia; used where Georgia is not installed (Android)
+const gelasio = Gelasio({ subsets: ["latin", "latin-ext"], variable: "--font-gelasio" });
 
 export const metadata: Metadata = {
   title: 'Bible - Your Reading Assistant',
@@ -70,7 +71,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="font-sans antialiased">
+      <body className={`${gelasio.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
