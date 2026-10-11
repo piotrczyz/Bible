@@ -62,11 +62,13 @@ jobs:
           
       - name: Set Firebase Functions secrets
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/firebase-sa.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
-          npx firebase-tools functions:secrets:set OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" --project ${{ secrets.FIREBASE_PROJECT_ID }} --force
-        continue-on-error: true
+          # The CLI takes only the key name; the value is read from stdin
+          printf '%s' "$OPENAI_API_KEY" | npx firebase-tools functions:secrets:set OPENAI_API_KEY --data-file=- --project ${{ secrets.FIREBASE_PROJECT_ID }} --force
 
       - name: Deploy Functions (Production)
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
