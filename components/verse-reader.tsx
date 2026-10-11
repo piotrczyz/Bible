@@ -163,6 +163,16 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
+      {/* Top fade: text dissolves under the status bar once the header slides away */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[calc(env(safe-area-inset-top)+4.5rem)]"
+        style={{
+          background:
+            "linear-gradient(to bottom, var(--background) env(safe-area-inset-top), color-mix(in oklch, var(--background) 85%, transparent) calc(env(safe-area-inset-top) + 1.25rem), transparent)",
+        }}
+      />
+
       <article
         className="prose prose-neutral dark:prose-invert mx-auto max-w-2xl px-4 pb-24 pt-6"
         style={{ fontSize: `${fontSize}px` }}
@@ -210,7 +220,7 @@ export function VerseReader({ book, chapter, onNavigate, onHome, initialVerse }:
                   id={`verse-${verseNumber}`}
                   onClick={() => handleVerseClick(verseNumber)}
                   className={cn(
-                    "font-serif leading-relaxed cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-all duration-200",
+                    "font-serif leading-[1.35] [font-variant-numeric:oldstyle-nums] cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-all duration-200",
                     // Unselected: grey background indicating tappable
                     !isSelected && "bg-secondary/40 hover:bg-secondary/50 active:bg-secondary/60 active:scale-[0.99]",
                     // Selected: clear background with pop animation
