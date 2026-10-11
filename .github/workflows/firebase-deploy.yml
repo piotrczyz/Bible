@@ -60,22 +60,33 @@ jobs:
           projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
           expires: 7d
           
+      # AI search (Cloud Functions) is optional: if the OpenAI key is missing or the
+      # functions deploy fails, the job still deploys Hosting and AI search is
+      # simply unavailable.
       - name: Set Firebase Functions secrets
+        id: functions-secret
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::warning::OPENAI_API_KEY is not set; skipping Functions deploy (AI search unavailable)"
+            exit 1
+          fi
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/firebase-sa.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
           # The CLI takes only the key name; the value is read from stdin
           printf '%s' "$OPENAI_API_KEY" | npx firebase-tools functions:secrets:set OPENAI_API_KEY --data-file=- --project ${{ secrets.FIREBASE_PROJECT_ID }} --force
 
       - name: Deploy Functions (Production)
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: steps.functions-secret.outcome == 'success'
+        continue-on-error: true
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/firebase-sa.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
-          npx firebase-tools deploy --only functions --project ${{ secrets.FIREBASE_PROJECT_ID }} --non-interactive
+          npx firebase-tools deploy --only functions --project ${{ secrets.FIREBASE_PROJECT_ID }} --non-interactive \
+            || { echo "::warning::Functions deploy failed; AI search unavailable"; exit 1; }
 
       - name: Deploy to Firebase Hosting (Production)
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
