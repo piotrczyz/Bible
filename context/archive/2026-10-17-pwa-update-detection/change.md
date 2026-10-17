@@ -1,10 +1,10 @@
 ---
 change_id: pwa-update-detection
 title: Installed PWA picks up new versions without reinstalling
-status: impl_reviewed
+status: archived
 created: 2026-10-17
 updated: 2026-10-17
-archived_at: null
+archived_at: 2026-10-17T21:18:12Z
 ---
 
 ## Notes
