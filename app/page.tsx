@@ -166,7 +166,12 @@ export default function BibleApp() {
             )}
 
             {view === "chapters" && selectedBook && (
-              <h1 className="text-lg font-semibold">{getBookName(selectedBook)}</h1>
+              <button
+                onClick={handleBack}
+                className="text-lg font-semibold hover:underline underline-offset-4"
+              >
+                {getBookName(selectedBook)}
+              </button>
             )}
 
             {view === "reader" && selectedBook && (
