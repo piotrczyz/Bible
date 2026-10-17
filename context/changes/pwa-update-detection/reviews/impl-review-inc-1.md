@@ -2,17 +2,17 @@
 # Implementation Review: PWA update detection and refresh UX — Implementation Plan
 
 **Plan**: context/changes/pwa-update-detection/plan.md   **Scope**: full plan (Phases 1-2, Increment 1)   **Date**: 2026-10-17
-**Round**: 1   **Verdict**: REJECTED   **Findings**: 2
+**Round**: 2   **Verdict**: APPROVED   **Findings**: 2
 
 ## Verdicts
 | Dimension | Verdict |
 |---|---|
-| Plan Adherence | WARNING |
+| Plan Adherence | PASS |
 | Scope Discipline | PASS |
 | Safety & Quality | PASS |
 | Architecture | PASS (no `context/architecture/model.c4` in this repo; gate not applicable) |
 | Pattern Consistency | PASS |
-| Success Criteria | FAIL |
+| Success Criteria | PASS |
 
 ## Findings
 
@@ -51,10 +51,20 @@
 ## Manual criteria
 
 - 1.8 (deployed preview serves `/sw.js` with `Cache-Control: no-cache`) — pending, needs a live deploy.
-- 2.7 (full end-to-end update flow on a deployed, installed PWA) — pending, needs a live deploy; given F1, this criterion is expected to fail for the "return from background" half of the check until F1 is fixed.
+- 2.7 (full end-to-end update flow on a deployed, installed PWA) — pending, needs a live deploy. With F1 fixed, the "return from background" half of this check should now behave per AC-02; still needs real-browser confirmation on a preview.
 
 ## Notes
 
 - `pnpm-workspace.yaml` is present untracked in the worktree (pnpm build-approval prompt artifact); it is not part of this change's diff and was not committed, so it is not a review finding.
 - `public/sw.js` is correctly removed from git tracking and gitignored; only `public/sw-template.js` is tracked.
 - No `context/architecture/model.c4` exists in this repo, so the architecture boundary gate does not apply.
+
+## Round 2
+
+Re-review of fix commit `5e52bec` (`fix(pwa-update-detection): address review findings (r1)`) plus the decision-record commit `4b08c53`.
+
+- **F1** — confirmed fixed. `components/pwa-register.tsx:18,68,85-86` now adds `hasBeenHiddenRef`, set `true` inside the existing `visibilitychange` listener on `document.visibilityState === 'hidden'`, and gates the silent branch on `!firstUpdateHandledRef.current && !hasBeenHiddenRef.current`. This is exactly the fix the finding asked for: once the page has been hidden at least once, any later detected update — including the first one this page's lifetime has seen — now goes through `promptForUpdate` instead of `applySilently`, which resolves the AC-02 gap (the realistic "launch → background → one deploy → return" sequence now prompts instead of silently reloading). The `registration.waiting` fast-path right after `register()` was correctly left unguarded, as recommended (no `hidden` transition can have happened yet at that point). No test runner exists in this repo, so the implementer's evidence is a standalone logic-trace reproduction (`fix-r1.md`) showing the pre-fix inputs resolve to `silent` and the post-fix inputs resolve to `prompt` for the exact F1 scenario, plus confirmation AC-01 (full launch, never hidden) still resolves to `silent` — reasonable substitute evidence given the no-test-infrastructure constraint recorded in `tech-stack.md`.
+- **F2** — untouched by the fix commit (diff is limited to the `hasBeenHiddenRef` addition and its one call site), as expected; stays `ACCEPT` per round 1.
+- **Regression sweep** — the fix commit touches only `components/pwa-register.tsx` (an increment-owned file) and the review record; no other `ACCEPT`/`DISMISS` finding's code was touched.
+- **Re-run** (plus the build, per the re-review rule): `pnpm lint` — PASS, same single pre-existing warning in `hooks/use-wake-lock.ts`, no new warnings. `pnpm typecheck` — PASS, clean. `pnpm build` — PASS, completed successfully; `out/sw.js` regenerated with a fresh `CACHE_VERSION` and no `__SW_BUILD_ID__` placeholder. `fix-r1.md` already carries a full baseline-comparable re-run of every Phase 1/2 automated criterion with no new failures, so the full suite was not repeated here.
+- **Verdict**: all findings resolved or accepted, all automated criteria pass, the build is not skipped → **APPROVED**. Manual criteria 1.8 and 2.7 remain pending a live preview (`manual-pending` guard), unaffected by the verdict.
