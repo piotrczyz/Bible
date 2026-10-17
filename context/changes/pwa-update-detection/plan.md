@@ -361,11 +361,11 @@ not invalidated.
 
 ### Phase 2: Silent update on full launch, prompted update while in use
 #### Automated
-- [x] 2.1 pnpm lint passes
-- [x] 2.2 pnpm typecheck passes
-- [x] 2.3 New translation keys present in English, Polish and Norwegian blocks
-- [x] 2.4 pwa-register.tsx uses useLanguage() and has no hardcoded English banner text
-- [x] 2.5 PWARegister is mounted inside LanguageProvider in app/layout.tsx
-- [x] 2.6 pwa-register.tsx registers visibilitychange and controllerchange listeners
+- [x] 2.1 pnpm lint passes — dd6bd31
+- [x] 2.2 pnpm typecheck passes — dd6bd31
+- [x] 2.3 New translation keys present in English, Polish and Norwegian blocks — dd6bd31
+- [x] 2.4 pwa-register.tsx uses useLanguage() and has no hardcoded English banner text — dd6bd31
+- [x] 2.5 PWARegister is mounted inside LanguageProvider in app/layout.tsx — dd6bd31
+- [x] 2.6 pwa-register.tsx registers visibilitychange and controllerchange listeners — dd6bd31
 #### Manual
 - [ ] 2.7 Full launch loads a new deploy silently; return-from-background shows the tap-to-refresh banner without disrupting the screen; reading history, settings, last position and offline Bible content survive both, and the app still works offline
