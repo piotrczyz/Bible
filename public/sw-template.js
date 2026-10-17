@@ -1,10 +1,17 @@
 // Service Worker for Scripture Bible Reader PWA
 // Provides offline support with a cache-first strategy for static assets
 // and network-first for Bible data (to allow updates when online)
+//
+// This file is the tracked source. `scripts/generate-sw.mjs` replaces the
+// build-id placeholder below with a fresh value on every build and writes
+// the result to public/sw.js (gitignored, a build output).
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = '__SW_BUILD_ID__';
 const STATIC_CACHE = `scripture-static-${CACHE_VERSION}`;
-const BIBLE_CACHE = `scripture-bibles-${CACHE_VERSION}`;
+// Stable name, independent of the per-build CACHE_VERSION, so an app-shell
+// deploy never deletes already-downloaded offline Bible content. Bump this
+// only if the Bible cache's own format changes.
+const BIBLE_CACHE = 'scripture-bibles-v1';
 
 // Static assets to cache immediately on install
 const STATIC_ASSETS = [
@@ -36,7 +43,6 @@ self.addEventListener('install', (event) => {
         console.log('[SW] Caching static assets');
         return cache.addAll(STATIC_ASSETS);
       })
-      .then(() => self.skipWaiting())
   );
 });
 
@@ -49,9 +55,8 @@ self.addEventListener('activate', (event) => {
         return Promise.all(
           cacheNames
             .filter((name) => {
-              return name.startsWith('scripture-') &&
-                     name !== STATIC_CACHE &&
-                     name !== BIBLE_CACHE;
+              return name.startsWith('scripture-static-') &&
+                     name !== STATIC_CACHE;
             })
             .map((name) => {
               console.log('[SW] Deleting old cache:', name);

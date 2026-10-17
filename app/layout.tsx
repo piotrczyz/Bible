@@ -85,9 +85,9 @@ export default function RootLayout({
               </ReadingHistoryProvider>
             </SettingsProvider>
             <PWAInstallPrompt />
+            <PWARegister />
           </LanguageProvider>
         </ThemeProvider>
-        <PWARegister />
         <Analytics />
       </body>
     </html>
