@@ -9,6 +9,13 @@ export function PWARegister() {
   // Tracks whether the first update detected this page lifetime has already
   // been applied. A ref (not state) so handling it never triggers a render.
   const firstUpdateHandledRef = useRef(false)
+  // Tracks whether the page has ever gone to the background and come back.
+  // The page's JS context (and firstUpdateHandledRef) survives a
+  // background/foreground cycle, so "first update this page has ever seen"
+  // is not the same as "full launch": once the page has been hidden at
+  // least once, any update found afterwards must prompt, never apply
+  // silently, even if it is still the first one this lifetime.
+  const hasBeenHiddenRef = useRef(false)
   const waitingWorkerRef = useRef<ServiceWorker | null>(null)
   const reloadingRef = useRef(false)
 
@@ -58,7 +65,7 @@ export function PWARegister() {
           }
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              if (!firstUpdateHandledRef.current) {
+              if (!firstUpdateHandledRef.current && !hasBeenHiddenRef.current) {
                 applySilently(newWorker)
               } else {
                 promptForUpdate(newWorker)
@@ -75,7 +82,9 @@ export function PWARegister() {
         // Check immediately whenever the page becomes visible again, e.g.
         // returning from the background - without blocking on the network.
         document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') {
+          if (document.visibilityState === 'hidden') {
+            hasBeenHiddenRef.current = true
+          } else if (document.visibilityState === 'visible') {
             registration.update().catch(() => {})
           }
         })
