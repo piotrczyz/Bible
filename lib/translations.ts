@@ -33,6 +33,10 @@ export interface Translations {
   iosInstallStep2: string;
   iosInstallStep3: string;
 
+  // PWA Update
+  updateAvailable: string;
+  updateRefresh: string;
+
   // Testament filters
   all: string;
   oldTestament: string;
@@ -179,6 +183,10 @@ const en: Translations = {
   iosInstallStep1: "Tap the Share button",
   iosInstallStep2: "Scroll down and tap \"Add to Home Screen\"",
   iosInstallStep3: "Tap \"Add\" to install",
+
+  // PWA Update
+  updateAvailable: "A new version is available.",
+  updateRefresh: "Refresh",
 
   // Testament filters
   all: "All",
@@ -327,6 +335,10 @@ const pl: Translations = {
   iosInstallStep2: "Przewiń w dół i dotknij \"Dodaj do ekranu głównego\"",
   iosInstallStep3: "Dotknij \"Dodaj\", aby zainstalować",
 
+  // PWA Update
+  updateAvailable: "Dostępna jest nowa wersja.",
+  updateRefresh: "Odśwież",
+
   // Testament filters
   all: "Wszystkie",
   oldTestament: "Stary Testament",
@@ -473,6 +485,10 @@ const no: Translations = {
   iosInstallStep1: "Trykk på Del-knappen",
   iosInstallStep2: "Rull ned og trykk \"Legg til på Hjem-skjerm\"",
   iosInstallStep3: "Trykk \"Legg til\" for å installere",
+
+  // PWA Update
+  updateAvailable: "En ny versjon er tilgjengelig.",
+  updateRefresh: "Oppdater",
 
   // Testament filters
   all: "Alle",

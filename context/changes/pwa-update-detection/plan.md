@@ -349,23 +349,23 @@ not invalidated.
 
 ### Phase 1: Fix delivery so a new service worker is actually detected and activated safely
 #### Automated
-- [x] 1.1 pnpm lint passes
-- [x] 1.2 pnpm typecheck passes
-- [x] 1.3 Running the generator twice produces two different CACHE_VERSION values with no leftover placeholder
-- [x] 1.4 Both generator runs produce an identical BIBLE_CACHE name
-- [x] 1.5 Generated public/sw.js has no unconditional self.skipWaiting() in the install handler
-- [x] 1.6 pnpm build completes and out/sw.js exists with no placeholder left
-- [x] 1.7 firebase.json is valid JSON and overrides Cache-Control to no-cache for /sw.js after the broad JS/CSS rule
+- [x] 1.1 pnpm lint passes — 55afcd8
+- [x] 1.2 pnpm typecheck passes — 55afcd8
+- [x] 1.3 Running the generator twice produces two different CACHE_VERSION values with no leftover placeholder — 55afcd8
+- [x] 1.4 Both generator runs produce an identical BIBLE_CACHE name — 55afcd8
+- [x] 1.5 Generated public/sw.js has no unconditional self.skipWaiting() in the install handler — 55afcd8
+- [x] 1.6 pnpm build completes and out/sw.js exists with no placeholder left — 55afcd8
+- [x] 1.7 firebase.json is valid JSON and overrides Cache-Control to no-cache for /sw.js after the broad JS/CSS rule — 55afcd8
 #### Manual
 - [ ] 1.8 Deployed preview serves /sw.js with Cache-Control: no-cache
 
 ### Phase 2: Silent update on full launch, prompted update while in use
 #### Automated
-- [ ] 2.1 pnpm lint passes
-- [ ] 2.2 pnpm typecheck passes
-- [ ] 2.3 New translation keys present in English, Polish and Norwegian blocks
-- [ ] 2.4 pwa-register.tsx uses useLanguage() and has no hardcoded English banner text
-- [ ] 2.5 PWARegister is mounted inside LanguageProvider in app/layout.tsx
-- [ ] 2.6 pwa-register.tsx registers visibilitychange and controllerchange listeners
+- [x] 2.1 pnpm lint passes
+- [x] 2.2 pnpm typecheck passes
+- [x] 2.3 New translation keys present in English, Polish and Norwegian blocks
+- [x] 2.4 pwa-register.tsx uses useLanguage() and has no hardcoded English banner text
+- [x] 2.5 PWARegister is mounted inside LanguageProvider in app/layout.tsx
+- [x] 2.6 pwa-register.tsx registers visibilitychange and controllerchange listeners
 #### Manual
 - [ ] 2.7 Full launch loads a new deploy silently; return-from-background shows the tap-to-refresh banner without disrupting the screen; reading history, settings, last position and offline Bible content survive both, and the app still works offline
