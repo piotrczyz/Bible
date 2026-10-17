@@ -1,10 +1,10 @@
 ---
 change_id: header-tap-navigation
 title: Add upward navigation by tapping the header title
-status: impl_reviewed
+status: archived
 created: 2026-10-17
 updated: 2026-10-17
-archived_at: null
+archived_at: 2026-10-17T20:45:10Z
 ---
 
 ## Notes
