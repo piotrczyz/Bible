@@ -112,9 +112,9 @@ None — UI-only change, no data or schema impact.
 
 ### Phase 1: Chapter grid title opens book list
 #### Automated
-- [x] 1.1 npm run typecheck passes
-- [x] 1.2 npm run lint passes
-- [x] 1.3 npm run build succeeds
+- [x] 1.1 npm run typecheck passes — 9dd997e
+- [x] 1.2 npm run lint passes — 9dd997e
+- [x] 1.3 npm run build succeeds — 9dd997e
 #### Manual
 - [ ] 1.4 On the chapter grid screen, tapping the header title shows the book list (AC-02)
 - [ ] 1.5 In the verse reader, tapping the header title still shows the chapter grid for the current book (AC-01, regression check on existing behavior)
