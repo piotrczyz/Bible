@@ -1,8 +1,14 @@
 import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
+import * as admin from "firebase-admin";
 
 // Define the secret for OpenAI API key
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
+
+// Guard against double-init (Cloud Functions may reuse the module across invocations).
+if (admin.apps.length === 0) {
+  admin.initializeApp();
+}
 
 // Bible books data
 const bibleBooks = [
@@ -126,6 +132,27 @@ export const search = onRequest(
     // Only allow POST requests
     if (req.method !== "POST") {
       res.status(405).json({ error: "Method not allowed" });
+      return;
+    }
+
+    // Require a valid Firebase ID token before doing any work.
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const idToken = authHeader.slice("Bearer ".length).trim();
+    if (!idToken) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    try {
+      await admin.auth().verifyIdToken(idToken);
+    } catch (error) {
+      console.error("Token verification failed:", error);
+      res.status(401).json({ error: "Unauthorized" });
       return;
     }
 

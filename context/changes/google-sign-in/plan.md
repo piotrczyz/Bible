@@ -540,7 +540,7 @@ to existing data.
 
 ### Phase 6: Cloud Function auth gate
 #### Automated
-- [ ] 6.1 The functions project's build/typecheck passes
+- [x] 6.1 The functions project's build/typecheck passes
 #### Manual
 - [ ] 6.2 A request to `/api/search` with no or an invalid `Authorization` header returns 401 and makes no OpenAI call
 
