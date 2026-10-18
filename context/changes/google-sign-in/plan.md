@@ -531,9 +531,9 @@ to existing data.
 
 ### Phase 5: Gate the Timeline trigger
 #### Automated
-- [x] 5.1 `pnpm typecheck` passes
-- [x] 5.2 `pnpm build` passes
-- [x] 5.3 `pnpm lint` passes
+- [x] 5.1 `pnpm typecheck` passes — 5da8c37
+- [x] 5.2 `pnpm build` passes — 5da8c37
+- [x] 5.3 `pnpm lint` passes — 5da8c37
 #### Manual
 - [ ] 5.4 A signed-out tap on the reading-history icon shows the explanation dialog; sign-in opens the timeline directly
 - [ ] 5.5 A profile with pre-existing local-only history shows an empty account timeline after sign-in, and the old `localStorage` key is untouched
