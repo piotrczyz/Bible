@@ -3,6 +3,8 @@
 import * as React from "react"
 import { useReadingHistory } from "@/components/reading-history-provider"
 import { useLanguage } from "@/components/language-provider"
+import { useAuth } from "@/components/auth-provider"
+import { SignInGate } from "@/components/sign-in-gate"
 import { getBook } from "@/lib/bible-data"
 import { getBibleVersion } from "@/lib/bible-versions"
 import {
@@ -29,7 +31,20 @@ interface TimelineSheetProps {
 export function TimelineSheet({ onNavigate }: TimelineSheetProps) {
   const { records, deleteRecord, clearHistory, isLoading } = useReadingHistory()
   const { t, language } = useLanguage()
+  const { user } = useAuth()
   const [open, setOpen] = React.useState(false)
+  const [signInGateOpen, setSignInGateOpen] = React.useState(false)
+
+  // Radix's Sheet trigger toggles `open` directly via onOpenChange; gate it
+  // here instead of intercepting the click so sign-in/sign-out keep working
+  // through keyboard and other activation paths too.
+  const handleOpenChange = (next: boolean) => {
+    if (next && !user) {
+      setSignInGateOpen(true)
+      return
+    }
+    setOpen(next)
+  }
 
   const groupedRecords = React.useMemo(() => {
     return groupRecordsByDate(records)
@@ -60,7 +75,8 @@ export function TimelineSheet({ onNavigate }: TimelineSheetProps) {
   }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <>
+      <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="h-9 w-9">
           <History className="h-5 w-5" />
@@ -130,7 +146,14 @@ export function TimelineSheet({ onNavigate }: TimelineSheetProps) {
           )}
         </div>
       </SheetContent>
-    </Sheet>
+      </Sheet>
+      <SignInGate
+        open={signInGateOpen}
+        onOpenChange={setSignInGateOpen}
+        onSignedIn={() => setOpen(true)}
+        featureLabel={t.timeline || "Reading history"}
+      />
+    </>
   )
 }
 
