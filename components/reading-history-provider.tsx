@@ -115,14 +115,14 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
   const [pendingOps, setPendingOps] = React.useState<PendingOp[]>([])
 
   const refreshPendingOps = React.useCallback(() => {
-    setPendingOps(listPending())
-  }, [])
+    setPendingOps(uid ? listPending(uid) : [])
+  }, [uid])
 
   const flushPending = React.useCallback(async () => {
     if (!uid) return
     if (typeof navigator !== "undefined" && !navigator.onLine) return
 
-    const pending = listPending()
+    const pending = listPending(uid)
     if (pending.length === 0) return
 
     const flushedIds: string[] = []
@@ -148,7 +148,7 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
     }
 
     if (flushedIds.length > 0) {
-      removePending(flushedIds)
+      removePending(uid, flushedIds)
       refreshPendingOps()
     }
   }, [uid, refreshPendingOps])
@@ -156,30 +156,36 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
   // Every mutation goes through the pending queue, then an immediate flush
   // attempt. When online the flush resolves right away, so this behaves the
   // same as a direct write; when offline the op simply stays queued until
-  // the "online" event (or the next sign-in) drains it.
+  // the "online" event (or the next sign-in) drains it. Each of these is
+  // only ever invoked while `uid` is set (every call site checks `uid`
+  // first), but the guard below keeps the queue correctly scoped even if
+  // that changes, and lets TS narrow `uid` from `string | null`.
   const persistUpsert = React.useCallback(
     (record: ReadingRecord) => {
-      enqueue({ id: generateId(), type: "upsert", record })
+      if (!uid) return
+      enqueue(uid, { id: generateId(), type: "upsert", record })
       refreshPendingOps()
       void flushPending()
     },
-    [refreshPendingOps, flushPending]
+    [uid, refreshPendingOps, flushPending]
   )
 
   const persistDelete = React.useCallback(
     (recordId: string) => {
-      enqueue({ id: generateId(), type: "delete", recordId })
+      if (!uid) return
+      enqueue(uid, { id: generateId(), type: "delete", recordId })
       refreshPendingOps()
       void flushPending()
     },
-    [refreshPendingOps, flushPending]
+    [uid, refreshPendingOps, flushPending]
   )
 
   const persistClear = React.useCallback(() => {
-    enqueue({ id: generateId(), type: "clear" })
+    if (!uid) return
+    enqueue(uid, { id: generateId(), type: "clear" })
     refreshPendingOps()
     void flushPending()
-  }, [refreshPendingOps, flushPending])
+  }, [uid, refreshPendingOps, flushPending])
 
   // Subscribe to the signed-in user's Firestore history; drop it immediately
   // on sign-out (the `records` memo below falls back to `localRecords` the
