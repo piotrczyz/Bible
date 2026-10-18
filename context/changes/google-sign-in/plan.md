@@ -496,17 +496,17 @@ to existing data.
 
 ### Phase 1: Firebase client SDK and auth core
 #### Automated
-- [x] 1.1 `pnpm typecheck` passes with `firebase` added as a dependency
-- [x] 1.2 `pnpm build` succeeds with `NEXT_PUBLIC_FIREBASE_*` env vars unset
-- [x] 1.3 `pnpm lint` passes
+- [x] 1.1 `pnpm typecheck` passes with `firebase` added as a dependency — dbcf786
+- [x] 1.2 `pnpm build` succeeds with `NEXT_PUBLIC_FIREBASE_*` env vars unset — dbcf786
+- [x] 1.3 `pnpm lint` passes — dbcf786
 #### Manual
 - [ ] 1.4 Architect provisions the real Firebase project and sets the `NEXT_PUBLIC_FIREBASE_*` secrets
 
 ### Phase 2: Sign-in explanation gate and Settings account UI
 #### Automated
-- [ ] 2.1 `pnpm typecheck` passes
-- [ ] 2.2 `pnpm build` passes
-- [ ] 2.3 `pnpm lint` passes
+- [x] 2.1 `pnpm typecheck` passes
+- [x] 2.2 `pnpm build` passes
+- [x] 2.3 `pnpm lint` passes
 #### Manual
 - [ ] 2.4 Settings shows no account section signed-out, and avatar/name/Sign out signed-in; Sign out returns to signed-out state
 - [ ] 2.5 Cancelling the Google popup leaves the user on the dialog with a message and the rest of the app keeps working

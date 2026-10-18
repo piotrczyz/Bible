@@ -64,6 +64,13 @@ export interface Translations {
   version: string;
   language: string;
 
+  // Sign-in
+  signInWithGoogle: string;
+  signInExplanationTitle: string;
+  signInExplanationBody: string;
+  signOut: string;
+  cancel: string;
+
   // Errors
   errorTryAgain: string;
 
@@ -214,6 +221,13 @@ const en: Translations = {
   aboutDescription: "Bible is your reading assistant. Open source, focused on clean reading experience.",
   version: "Version",
   language: "Language",
+
+  // Sign-in
+  signInWithGoogle: "Sign in with Google",
+  signInExplanationTitle: "Sign in to continue",
+  signInExplanationBody: "{feature} requires a free Google sign-in. Your reading stays private to your account.",
+  signOut: "Sign out",
+  cancel: "Cancel",
 
   // Errors
   errorTryAgain: "Please try again or select a different version.",
@@ -366,6 +380,13 @@ const pl: Translations = {
   version: "Wersja",
   language: "Język",
 
+  // Sign-in
+  signInWithGoogle: "Zaloguj się przez Google",
+  signInExplanationTitle: "Zaloguj się, aby kontynuować",
+  signInExplanationBody: "{feature} wymaga bezpłatnego logowania przez Google. Twoja historia czytania pozostaje prywatna i przypisana do Twojego konta.",
+  signOut: "Wyloguj się",
+  cancel: "Anuluj",
+
   // Errors
   errorTryAgain: "Spróbuj ponownie lub wybierz inny przekład.",
 
@@ -516,6 +537,13 @@ const no: Translations = {
   aboutDescription: "Bibelen er din leseassistent. Åpen kildekode, fokus på ren leseopplevelse.",
   version: "Versjon",
   language: "Språk",
+
+  // Sign-in
+  signInWithGoogle: "Logg inn med Google",
+  signInExplanationTitle: "Logg inn for å fortsette",
+  signInExplanationBody: "{feature} krever gratis innlogging med Google. Lesingen din holdes privat på kontoen din.",
+  signOut: "Logg ut",
+  cancel: "Avbryt",
 
   // Errors
   errorTryAgain: "Vennligst prøv igjen eller velg en annen oversettelse.",
