@@ -155,7 +155,7 @@ attaches the current user's ID token to its existing `fetch` call.
 
 | # | Name | Phases | Depends on | User-visible | Status | PR |
 |---|---|---|---|---|---|---|
-| 1 | Google Sign-In & Auth Core | 1-2 | — | yes | pending | — |
+| 1 | Google Sign-In & Auth Core | 1-2 | — | yes | done | — |
 | 2 | Reading History Account Sync | 3-5 | 1 | yes | pending | — |
 | 3 | AI Search Sign-In Gate | 6-7 | 1 | yes | pending | — |
 
