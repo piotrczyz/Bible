@@ -496,9 +496,9 @@ to existing data.
 
 ### Phase 1: Firebase client SDK and auth core
 #### Automated
-- [ ] 1.1 `pnpm typecheck` passes with `firebase` added as a dependency
-- [ ] 1.2 `pnpm build` succeeds with `NEXT_PUBLIC_FIREBASE_*` env vars unset
-- [ ] 1.3 `pnpm lint` passes
+- [x] 1.1 `pnpm typecheck` passes with `firebase` added as a dependency
+- [x] 1.2 `pnpm build` succeeds with `NEXT_PUBLIC_FIREBASE_*` env vars unset
+- [x] 1.3 `pnpm lint` passes
 #### Manual
 - [ ] 1.4 Architect provisions the real Firebase project and sets the `NEXT_PUBLIC_FIREBASE_*` secrets
 

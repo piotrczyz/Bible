@@ -6,6 +6,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { SettingsProvider } from '@/components/settings-provider'
 import { LanguageProvider } from '@/components/language-provider'
+import { AuthProvider } from '@/components/auth-provider'
 import { ReadingHistoryProvider } from '@/components/reading-history-provider'
 import { PWARegister } from '@/components/pwa-register'
 import { PWAInstallPrompt } from '@/components/pwa-install-prompt'
@@ -80,9 +81,11 @@ export default function RootLayout({
         >
           <LanguageProvider>
             <SettingsProvider>
-              <ReadingHistoryProvider>
-                {children}
-              </ReadingHistoryProvider>
+              <AuthProvider>
+                <ReadingHistoryProvider>
+                  {children}
+                </ReadingHistoryProvider>
+              </AuthProvider>
             </SettingsProvider>
             <PWAInstallPrompt />
             <PWARegister />
