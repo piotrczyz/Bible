@@ -1,10 +1,10 @@
 ---
 change_id: google-sign-in
 title: Users can sign in with Google to unlock reading history and AI search
-status: implementing
+status: archived
 created: 2026-10-18
 updated: 2026-10-18
-archived_at: null
+archived_at: 2026-10-18T09:35:51Z
 ---
 
 ## Notes

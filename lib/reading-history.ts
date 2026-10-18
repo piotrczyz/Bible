@@ -58,6 +58,40 @@ export function createReadingRecord(
 }
 
 /**
+ * Serialize a ReadingRecord for storage as a Firestore document.
+ * The document id is the record's own `id`, so it is not duplicated in the
+ * document body.
+ */
+export function toFirestoreDoc(record: ReadingRecord): Record<string, unknown> {
+  return {
+    bookId: record.bookId,
+    chapter: record.chapter,
+    verses: record.verses,
+    versionId: record.versionId,
+    timestamp: record.timestamp,
+  }
+}
+
+/**
+ * Rebuild a ReadingRecord from a Firestore document id + data, tolerating
+ * missing/malformed fields rather than throwing.
+ */
+export function fromFirestoreDoc(id: string, data: Record<string, unknown>): ReadingRecord {
+  const verses = Array.isArray(data.verses)
+    ? data.verses.filter((v): v is number => typeof v === "number")
+    : []
+
+  return {
+    id,
+    bookId: typeof data.bookId === "string" ? data.bookId : "",
+    chapter: typeof data.chapter === "number" ? data.chapter : 0,
+    verses,
+    versionId: typeof data.versionId === "string" ? data.versionId : "",
+    timestamp: typeof data.timestamp === "string" ? data.timestamp : new Date().toISOString(),
+  }
+}
+
+/**
  * Group reading records by date for display
  */
 export function groupRecordsByDate(
