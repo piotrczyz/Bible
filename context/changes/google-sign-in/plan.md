@@ -513,9 +513,9 @@ to existing data.
 
 ### Phase 3: Firestore schema, security rules, and sync queue
 #### Automated
-- [ ] 3.1 `pnpm typecheck` passes
-- [ ] 3.2 `pnpm build` passes
-- [ ] 3.3 `pnpm lint` passes
+- [x] 3.1 `pnpm typecheck` passes
+- [x] 3.2 `pnpm build` passes
+- [x] 3.3 `pnpm lint` passes
 #### Manual
 - [ ] 3.4 Deployed `firestore.rules` deny a non-owner read/write to another uid's `readingHistory`
 
