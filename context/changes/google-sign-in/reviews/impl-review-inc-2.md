@@ -2,14 +2,14 @@
 # Implementation Review: Google Sign-In — Reading History Account Sync
 
 **Plan**: context/changes/google-sign-in/plan.md   **Scope**: Increment 2 (phases 3-5)   **Date**: 2026-10-18
-**Round**: 1   **Verdict**: NEEDS_ATTENTION   **Findings**: 2
+**Round**: 2   **Verdict**: APPROVED   **Findings**: 2
 
 ## Verdicts
 | Dimension | Verdict |
 |---|---|
 | Plan Adherence | PASS |
 | Scope Discipline | PASS |
-| Safety & Quality | WARNING |
+| Safety & Quality | PASS |
 | Architecture | PASS |
 | Pattern Consistency | PASS |
 | Success Criteria | PASS |
@@ -58,7 +58,7 @@ account (see F1).
 - **Location**: `lib/reading-sync-queue.ts:13` (single global `QUEUE_STORAGE_KEY`, no owner field on `PendingOp`), `components/reading-history-provider.tsx:117-154,187-197` (`flushPending`/`refreshPendingOps` act on `listPending()` with no check that a queued op belongs to the current `uid`)
 - **Detail**: `PendingOp` carries no owner id and `bible-reading-sync-queue` is one `localStorage` key shared by every account that ever signs in on that browser. Scenario: user A is signed in, goes offline, taps verses (ops enqueued), then signs out before reconnecting — `signOutUser()` (`components/auth-provider.tsx:78-88`) does not touch the queue, and the sign-out effect in the provider only clears in-memory `pendingOps`/`remoteRecords`, never the `localStorage` queue (`reading-history-provider.tsx:187-193`). If user B now signs in on the same browser (a shared/family device — a realistic case for this app), the `uid` effect fires `refreshPendingOps()` + `flushPending()` unconditionally for the new `uid`, and `flushPending` writes every still-queued op (user A's reading records) to `users/{B's uid}/readingHistory/...` (`reading-history-provider.tsx:195-197,121-154`). User A's reading activity is now permanently attributed to user B's account; there's no sign the record ever belonged to someone else. This isn't caught by the Firestore security rules (those correctly restrict reads/writes to `request.auth.uid == uid` — the write is legitimately made by B's authenticated session against B's own path) and isn't an acceptance criterion scenario, but it contradicts FR-005 ("readings are stored on their account") and the NFR that a user's history belongs to their own account.
 - **Fix**: scope the queue to the signed-in account — either key `localStorage` per uid (`bible-reading-sync-queue:${uid}`) so a different account's sign-in never sees another account's pending ops, or add an `ownerUid` field to `PendingOp` and have `listPending()`/`flushPending()` filter to the current `uid`, dropping (not flushing) entries whose owner doesn't match.
-- **Decision**: FIX — conservative, well-scoped change; no architecture or contract impact.
+- **Decision**: FIXED (5b36ffc) — verified r2. See `## Round 2` below.
 
 ### F2 — `timeline-sheet.tsx`'s `Sheet` JSX is left under-indented after being wrapped in a `Fragment`
 - **Severity**: OBSERVATION
@@ -87,6 +87,49 @@ account (see F1).
 - [ ] 5.5 A profile with pre-existing local-only history shows an empty account timeline after sign-in, old `localStorage` key untouched — diff evidence supports this (the legacy `STORAGE_KEY` path is read once at mount but never rendered or written to while `uid` is set); still needs an eyeball check.
 
 No `- [x]` manual row claims verification without diff evidence (no "blind signing" found).
+
+## Round 2 (re-review of fix commit 5b36ffc)
+
+Scope per rs-core §11: only F1 (the fixed finding) plus the build. Read
+`reviews/fix-r1.md` and `git show 5b36ffc` instead of re-running the full
+Step 2 subagent pass; the fix diff touches exactly `lib/reading-sync-queue.ts`
+and `components/reading-history-provider.tsx` (confirmed via `git show
+5b36ffc --stat`), both inside this increment's owned files — no out-of-plan
+files, no ACCEPT/DISMISS finding (F2) touched.
+
+- **Fix confirmed correct**: `lib/reading-sync-queue.ts` now namespaces
+  `localStorage` per account (`storageKeyFor(uid)` →
+  `` `bible-reading-sync-queue:${uid}` ``); `enqueue`/`listPending`/
+  `removePending` all take `uid` as their first argument
+  (`lib/reading-sync-queue.ts:30-69`). `components/reading-history-provider.tsx`
+  threads the signed-in `uid` through every call site —
+  `refreshPendingOps` (`:117-119`), `flushPending` (`:125,151`),
+  `persistUpsert`/`persistDelete`/`persistClear` (`:160-186`, each now also
+  guarded with `if (!uid) return` before enqueueing). Verified via
+  `grep -rn "enqueue(\|listPending(\|removePending("` that
+  `reading-history-provider.tsx` is the only caller, so the signature change
+  has no missed call sites — confirmed independently of `fix-r1.md`'s own
+  claim of the same.
+- **Scenario re-traced**: user A signs in, queues writes offline under
+  `bible-reading-sync-queue:<A>`, signs out before reconnecting (sign-out
+  clears only in-memory `pendingOps`/`remoteRecords`, `reading-history-provider.tsx:188-192`,
+  never the `localStorage` queue — unchanged by the fix, as intended). User B
+  signs in on the same browser: `refreshPendingOps()`/`flushPending()` now
+  run against `listPending(B's uid)`, which reads
+  `bible-reading-sync-queue:<B>` — a different key — so A's still-queued ops
+  are never read, flushed, or exposed to B. A's queue remains under A's own
+  key, drained only if A signs back in on that browser. This resolves the
+  cross-account misattribution F1 described.
+- **Re-ran Automated criteria** (phases 3-5, rs-core §11 — the build plus the
+  criteria the fix touched): `pnpm typecheck` → clean; `pnpm lint` → 0
+  errors, the same one pre-existing `hooks/use-wake-lock.ts` warning,
+  unrelated to this diff; `pnpm build` → `next build` compiled and
+  prerendered successfully, `NEXT_PUBLIC_FIREBASE_*` unset. All PASS, matching
+  `fix-r1.md`'s own recorded results.
+- F2 was `DISMISS` in round 1 (cosmetic only) and is untouched by the fix
+  commit — no regression check needed there.
+
+No new findings from the fix itself. Verdict raised to **APPROVED**.
 
 ## Notes
 

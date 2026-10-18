@@ -20,10 +20,4 @@ safe on the account).
   sign-in screen instead of your history, and that signing in takes you
   straight into the timeline
 
-**Status:** Not ready yet: before this ships, we want to close a gap where,
-on a shared device, if one person was signed in and went offline, then
-signed out before reconnecting, and a second person then signs in with
-their own Google account on that same device, the first person's
-not-yet-saved readings could end up recorded under the second person's
-account instead of being discarded. We're fixing that before this goes
-further.
+**Status:** Ready to merge once you have checked the preview.
