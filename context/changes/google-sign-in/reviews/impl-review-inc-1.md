@@ -2,14 +2,14 @@
 # Implementation Review: Google Sign-In — Implementation Plan
 
 **Plan**: context/changes/google-sign-in/plan.md   **Scope**: Increment 1 (Phases 1-2)   **Date**: 2026-10-18
-**Round**: 1   **Verdict**: APPROVED   **Findings**: 2
+**Round**: 2   **Verdict**: APPROVED   **Findings**: 2
 
 ## Verdicts
 | Dimension | Verdict |
 |---|---|
-| Plan Adherence | WARNING |
+| Plan Adherence | WARNING (F2, ACCEPT — unchanged) |
 | Scope Discipline | PASS |
-| Safety & Quality | WARNING |
+| Safety & Quality | PASS (F1 fixed in r1) |
 | Architecture | PASS (no `context/architecture/` model exists; not applicable) |
 | Pattern Consistency | PASS |
 | Success Criteria | PASS |
@@ -23,7 +23,7 @@
 - **Location**: `components/auth-provider.tsx:48-53,62-67` (raw `err.message` / hardcoded English fallbacks `"Sign-in failed. Please try again."`, `"Sign-out failed. Please try again."`, `"Sign-in is not configured yet."`), surfaced verbatim by `components/sign-in-gate.tsx:48-52`.
 - **Detail**: `AuthProvider` never imports `useLanguage`/`useTranslations`, so every error path shows either a raw Firebase SDK string (e.g. `"Firebase: Error (auth/popup-closed-by-user)."`) or a hardcoded English sentence, regardless of the active UI language. This contradicts the explicit constraint in `change.md:127` ("UI copy in English, Polish and Norwegian, as the rest of the app") and weakens AC-07's requirement for "a clear message" on cancel/failure — a raw SDK error code is not a clear message to an end user, and `lib/translations.ts` already has a precedent pattern for this (`errorTryAgain`). This is a narrower issue than the accepted gap in Open Question #3 (which concerns the static explanation/Settings copy — that copy *was* fully translated into EN/PL/NO by this diff, exceeding the accepted-gap risk); the dynamic error text was not covered by that waiver.
 - **Fix**: Add 1-2 translation keys (e.g. `signInCancelled`, `signInFailed`, reusing the existing `cancel`-style three-language pattern) and map the known case (`auth/popup-closed-by-user` → no error, or a neutral "cancelled" string) plus a generic translated fallback for everything else, instead of passing `err.message` straight into state.
-- **Decision**: FIXED (5001d17)
+- **Decision**: FIXED (5001d17) — verified r2
 
 ### F2 — Avatar built by reusing the existing shadcn/Radix primitive, not the plan's hand-rolled component
 - **Severity**: OBSERVATION
@@ -48,3 +48,30 @@
 
 ## Manual criteria status
 - 1.4 (Firebase project provisioning) and 2.4/2.5 (real sign-in/sign-out round trip, cancel flow) are correctly left unchecked — they need a live Firebase project the architect has not yet provisioned, per Phase 1's own manual criterion. Carried as `manual-pending`.
+
+## Round 2
+
+Re-review scoped to the F1 fix (`5001d17`, per `reviews/fix-r1.md`) and the
+regression sweep, per rs-core §11 — Step 2's subagents were not re-run.
+
+- **F1 confirmed fixed.** `git show 5001d17` adds `signInNotConfigured`,
+  `signInCancelled`, `signInFailed`, `signOutFailed` to `Translations` in
+  `lib/translations.ts` (filled for `en`/`pl`/`no`), and
+  `components/auth-provider.tsx` now imports `useLanguage`, uses
+  `err instanceof FirebaseError && err.code === "auth/popup-closed-by-user"`
+  to pick `t.signInCancelled` vs. `t.signInFailed`, and uses `t.signOutFailed`
+  / `t.signInNotConfigured` in place of every raw `err.message` /
+  hardcoded-English string the finding flagged. No raw SDK message is
+  surfaced to the UI anymore.
+- **Automated criteria re-run** (no test framework exists, per
+  `fix-r1.md` and `context/foundation/tech-stack.md`): `pnpm typecheck` →
+  clean; `pnpm lint` → 0 errors (same pre-existing unrelated warning in
+  `hooks/use-wake-lock.ts`); `pnpm build` with `NEXT_PUBLIC_FIREBASE_*`
+  unset → compiles and prerenders successfully. All three match what
+  `fix-r1.md` recorded.
+- **Regression sweep.** F2 (`ACCEPT`) was not touched by the fix commit
+  (`git show 5001d17 --stat` lists only `components/auth-provider.tsx`,
+  `lib/translations.ts`, and `reviews/fix-r1.md`). The fix stayed inside
+  increment 1's owned files; no out-of-plan files introduced.
+
+No new findings. Verdict stands at **APPROVED**.

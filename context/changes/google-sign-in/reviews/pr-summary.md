@@ -8,4 +8,4 @@
 **Your decision is needed on:**
 - Signing in itself cannot be tested yet: it needs a real Google sign-in project to be set up (API keys, consent screen). That is a one-time setup step for the project owner; this PR cannot do it from the code alone.
 
-**Status:** Not ready yet: a small wording polish is being finished before this is ready to merge.
+**Status:** Ready to merge; this part has no visible sign-in button yet, so there is nothing else to check by hand.
