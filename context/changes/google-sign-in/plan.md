@@ -546,8 +546,8 @@ to existing data.
 
 ### Phase 7: Client sends the ID token and gates the AI search trigger
 #### Automated
-- [x] 7.1 `pnpm typecheck` passes
-- [x] 7.2 `pnpm build` passes
-- [x] 7.3 `pnpm lint` passes
+- [x] 7.1 `pnpm typecheck` passes — d43d38d
+- [x] 7.2 `pnpm build` passes — d43d38d
+- [x] 7.3 `pnpm lint` passes — d43d38d
 #### Manual
 - [ ] 7.4 A signed-out tap on AI search shows the explanation dialog; sign-in lands back in AI search and a search returns results
