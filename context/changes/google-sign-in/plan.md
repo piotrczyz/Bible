@@ -504,9 +504,9 @@ to existing data.
 
 ### Phase 2: Sign-in explanation gate and Settings account UI
 #### Automated
-- [x] 2.1 `pnpm typecheck` passes
-- [x] 2.2 `pnpm build` passes
-- [x] 2.3 `pnpm lint` passes
+- [x] 2.1 `pnpm typecheck` passes — 48c54f8
+- [x] 2.2 `pnpm build` passes — 48c54f8
+- [x] 2.3 `pnpm lint` passes — 48c54f8
 #### Manual
 - [ ] 2.4 Settings shows no account section signed-out, and avatar/name/Sign out signed-in; Sign out returns to signed-out state
 - [ ] 2.5 Cancelling the Google popup leaves the user on the dialog with a message and the rest of the app keeps working
