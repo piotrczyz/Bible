@@ -1,11 +1,9 @@
 <!-- preview-link -->
 
-**What this delivers:** The groundwork for signing in with a Google account: the app can now recognize a signed-in user and show their name and a "Sign out" option in Settings. Reading the Bible, without an account, keeps working exactly as before, online or offline.
+**What this delivers:** AI-powered verse search is now only available to people who sign in with Google. A signed-out tap on AI search shows a short explanation with a "Sign in with Google" button; after signing in, the person lands straight back in search. The search service itself now rejects any request that is not from a signed-in user, so it can no longer be used anonymously.
 
 **Please check on the preview:**
-- Reading the Bible, changing settings, language, version, font size and theme still work exactly as today, with no sign-in prompt anywhere yet.
+- Tap AI search while signed out: you should see the sign-in explanation, not the search box.
+- Sign in with Google from that screen: you should land back in AI search and get results for a query.
 
-**Your decision is needed on:**
-- Signing in itself cannot be tested yet: it needs a real Google sign-in project to be set up (API keys, consent screen). That is a one-time setup step for the project owner; this PR cannot do it from the code alone.
-
-**Status:** Ready to merge; this part has no visible sign-in button yet, so there is nothing else to check by hand.
+**Status:** Not ready to merge yet: the Firebase project (Google sign-in, Firestore) still needs to be provisioned before sign-in can be tested on the preview; this part works once that is in place.
