@@ -5,6 +5,9 @@ import { Search, X, Loader2, Sparkles, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/components/language-provider"
+import { useAuth } from "@/components/auth-provider"
+import { SignInGate } from "@/components/sign-in-gate"
+import { auth } from "@/lib/firebase"
 import { cn } from "@/lib/utils"
 
 interface SearchResult {
@@ -26,13 +29,23 @@ export function AISearch({ onNavigate }: AISearchProps) {
   const [results, setResults] = React.useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const [isSignInGateOpen, setIsSignInGateOpen] = React.useState(false)
   const inputRef = React.useRef<HTMLInputElement>(null)
 
   const { t } = useLanguage()
+  const { user } = useAuth()
 
   const handleExpand = () => {
     setIsExpanded(true)
     setTimeout(() => inputRef.current?.focus(), 100)
+  }
+
+  const handleTriggerClick = () => {
+    if (!user) {
+      setIsSignInGateOpen(true)
+      return
+    }
+    handleExpand()
   }
 
   const handleClose = () => {
@@ -52,9 +65,15 @@ export function AISearch({ onNavigate }: AISearchProps) {
     setResults([])
 
     try {
+      const idToken = await auth.currentUser?.getIdToken()
+      const headers: Record<string, string> = { "Content-Type": "application/json" }
+      if (idToken) {
+        headers.Authorization = `Bearer ${idToken}`
+      }
+
       const response = await fetch("/api/search", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ query: query.trim() }),
       })
 
@@ -99,15 +118,23 @@ export function AISearch({ onNavigate }: AISearchProps) {
 
   if (!isExpanded) {
     return (
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={handleExpand}
-        className="h-9 w-9"
-        aria-label={t.aiSearch}
-      >
-        <Search className="h-5 w-5" />
-      </Button>
+      <>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleTriggerClick}
+          className="h-9 w-9"
+          aria-label={t.aiSearch}
+        >
+          <Search className="h-5 w-5" />
+        </Button>
+        <SignInGate
+          open={isSignInGateOpen}
+          onOpenChange={setIsSignInGateOpen}
+          onSignedIn={handleExpand}
+          featureLabel={t.aiSearch}
+        />
+      </>
     )
   }
 
