@@ -5,7 +5,9 @@ import React from "react"
 import { useTheme } from "next-themes"
 import { useSettings } from "@/components/settings-provider"
 import { useLanguage } from "@/components/language-provider"
+import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import {
   Sheet,
   SheetContent,
@@ -31,6 +33,7 @@ export function SettingsSheet() {
   const { theme, setTheme } = useTheme()
   const { fontSize, setFontSize, versionId, setVersionId, currentVersion } = useSettings()
   const { t, language, setLanguage, languages } = useLanguage()
+  const { user, signOutUser } = useAuth()
   const bibleLanguages = getAvailableLanguages()
 
   return (
@@ -159,6 +162,31 @@ export function SettingsSheet() {
             </div>
           </div>
 
+          {/* Account */}
+          {user && (
+            <div className="space-y-3 border-t border-border pt-6">
+              <div className="flex items-center gap-3">
+                <Avatar>
+                  {user.photoURL && (
+                    <AvatarImage src={user.photoURL} alt={user.displayName ?? ""} />
+                  )}
+                  <AvatarFallback>{getInitials(user.displayName, user.email)}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">
+                    {user.displayName ?? user.email}
+                  </p>
+                  {user.displayName && user.email && (
+                    <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                  )}
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => signOutUser()}>
+                {t.signOut}
+              </Button>
+            </div>
+          )}
+
           {/* About */}
           <div className="space-y-3 border-t border-border pt-6">
             <h3 className="text-sm font-medium">{t.about}</h3>
@@ -173,6 +201,14 @@ export function SettingsSheet() {
       </SheetContent>
     </Sheet>
   )
+}
+
+function getInitials(displayName: string | null, email: string | null): string {
+  const source = displayName ?? email ?? ""
+  const parts = source.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return "?"
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
 function ThemeButton({

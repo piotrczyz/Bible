@@ -615,6 +615,7 @@ Before submitting code for review:
 | 2026-01-26 | Reading history with timestamps | Track chapter reads for analytics and future Firebase sync | Architect |
 | 2026-01-26 | UUID + ISO 8601 for reading records | Firebase-compatible data structure, conflict-free sync | Architect |
 | 2026-01-28 | AI-powered verse search | Semantic search using OpenAI API, server-side API key | Architect |
+| 2026-10-18 | Firebase Auth (Google) | Sign-in required for reading history and AI search; stops anonymous use and identifies users (issue #34) | Architect |
 
 ## MVP Scope
 
@@ -655,11 +656,23 @@ The application requires the following environment variables:
 | Variable | Purpose | Required |
 |----------|---------|----------|
 | `OPENAI_API_KEY` | OpenAI API key for AI-powered verse search | Yes (for AI search) |
+| `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase web app API key (Google sign-in, Firestore) | Yes (for sign-in) |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase Auth domain for the web app | Yes (for sign-in) |
+| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Firebase project id | Yes (for sign-in) |
+| `NEXT_PUBLIC_FIREBASE_APP_ID` | Firebase web app id | Yes (for sign-in) |
 
 **Local Development:** Create a `.env.local` file in the project root:
 ```
 OPENAI_API_KEY=sk-your-key-here
+NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-firebase-app-id
 ```
+
+Sign-in and account sync stay disabled (the app falls back to signed-out,
+local-only behavior) when the `NEXT_PUBLIC_FIREBASE_*` vars are unset, so the
+app keeps working without them.
 
 **Production:** Environment variables are configured via GitHub Actions secrets and injected during deployment.
 
@@ -718,6 +731,7 @@ npx cap open android
 | `clsx`, `tailwind-merge` | Class utilities (shadcn/ui) | Decided |
 | `dexie` | IndexedDB wrapper for offline storage (Apache 2.0) | Decided |
 | `@capacitor/network` | Network status detection (MIT) | Decided |
+| `firebase` | Firebase client SDK (Auth + Firestore) for Google sign-in and account-backed reading history (Apache 2.0) | Decided |
 
 ### Deferred Decisions
 
@@ -727,7 +741,6 @@ npx cap open android
 |----------|---------|-------|
 | Data Fetching | TanStack Query (MIT), SWR (MIT) | For server API calls (optional) |
 | Form Handling | React Hook Form (MIT) | When complex forms are needed |
-| Backend/Auth | TBD | When user accounts are implemented |
 | Encryption | crypto-js (MIT), Web Crypto API | For E2E encrypted sync (future) |
 
 ## Troubleshooting
