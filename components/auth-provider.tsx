@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { FirebaseError } from "firebase/app"
 import {
   onAuthStateChanged,
   signInWithPopup,
@@ -8,6 +9,7 @@ import {
   type User as FirebaseUser,
 } from "firebase/auth"
 import { auth, googleProvider, isFirebaseConfigured } from "@/lib/firebase"
+import { useLanguage } from "@/components/language-provider"
 
 export interface AuthUser {
   uid: string
@@ -36,6 +38,7 @@ function toAuthUser(firebaseUser: FirebaseUser): AuthUser {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { t } = useLanguage()
   const [user, setUser] = React.useState<AuthUser | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
@@ -56,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = React.useCallback(async () => {
     if (!isFirebaseConfigured) {
-      setError("Sign-in is not configured yet.")
+      setError(t.signInNotConfigured)
       return
     }
 
@@ -64,11 +67,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await signInWithPopup(auth, googleProvider)
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Sign-in failed. Please try again."
-      setError(message)
+      if (err instanceof FirebaseError && err.code === "auth/popup-closed-by-user") {
+        setError(t.signInCancelled)
+      } else {
+        setError(t.signInFailed)
+      }
     }
-  }, [])
+  }, [t])
 
   const signOutUser = React.useCallback(async () => {
     if (!isFirebaseConfigured) {
@@ -77,12 +82,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       await signOut(auth)
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Sign-out failed. Please try again."
-      setError(message)
+    } catch {
+      setError(t.signOutFailed)
     }
-  }, [])
+  }, [t])
 
   return (
     <AuthContext.Provider

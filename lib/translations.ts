@@ -70,6 +70,10 @@ export interface Translations {
   signInExplanationBody: string;
   signOut: string;
   cancel: string;
+  signInNotConfigured: string;
+  signInCancelled: string;
+  signInFailed: string;
+  signOutFailed: string;
 
   // Errors
   errorTryAgain: string;
@@ -228,6 +232,10 @@ const en: Translations = {
   signInExplanationBody: "{feature} requires a free Google sign-in. Your reading stays private to your account.",
   signOut: "Sign out",
   cancel: "Cancel",
+  signInNotConfigured: "Sign-in is not configured yet.",
+  signInCancelled: "Sign-in was cancelled.",
+  signInFailed: "Sign-in failed. Please try again.",
+  signOutFailed: "Sign-out failed. Please try again.",
 
   // Errors
   errorTryAgain: "Please try again or select a different version.",
@@ -386,6 +394,10 @@ const pl: Translations = {
   signInExplanationBody: "{feature} wymaga bezpłatnego logowania przez Google. Twoja historia czytania pozostaje prywatna i przypisana do Twojego konta.",
   signOut: "Wyloguj się",
   cancel: "Anuluj",
+  signInNotConfigured: "Logowanie nie jest jeszcze skonfigurowane.",
+  signInCancelled: "Logowanie zostało anulowane.",
+  signInFailed: "Logowanie nie powiodło się. Spróbuj ponownie.",
+  signOutFailed: "Wylogowanie nie powiodło się. Spróbuj ponownie.",
 
   // Errors
   errorTryAgain: "Spróbuj ponownie lub wybierz inny przekład.",
@@ -544,6 +556,10 @@ const no: Translations = {
   signInExplanationBody: "{feature} krever gratis innlogging med Google. Lesingen din holdes privat på kontoen din.",
   signOut: "Logg ut",
   cancel: "Avbryt",
+  signInNotConfigured: "Innlogging er ikke konfigurert ennå.",
+  signInCancelled: "Innloggingen ble avbrutt.",
+  signInFailed: "Innlogging mislyktes. Prøv igjen.",
+  signOutFailed: "Utlogging mislyktes. Prøv igjen.",
 
   // Errors
   errorTryAgain: "Vennligst prøv igjen eller velg en annen oversettelse.",
