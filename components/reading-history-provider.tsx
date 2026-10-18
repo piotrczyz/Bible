@@ -2,9 +2,31 @@
 
 import * as React from "react"
 import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  setDoc,
+} from "firebase/firestore"
+import {
   type ReadingRecord,
   createReadingRecord,
+  fromFirestoreDoc,
+  generateId,
+  toFirestoreDoc,
 } from "@/lib/reading-history"
+import {
+  enqueue,
+  listPending,
+  removePending,
+  type PendingOp,
+} from "@/lib/reading-sync-queue"
+import { db } from "@/lib/firebase"
+import { useAuth } from "@/components/auth-provider"
 
 const STORAGE_KEY = "bible-reading-history"
 const MAX_RECORDS = 1000 // Limit to prevent excessive storage usage
@@ -36,8 +58,16 @@ const ReadingHistoryContext = React.createContext<ReadingHistoryContextType | un
   undefined
 )
 
+function sortByTimestampDesc(records: ReadingRecord[]): ReadingRecord[] {
+  return [...records].sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  )
+}
+
 export function ReadingHistoryProvider({ children }: { children: React.ReactNode }) {
-  const [records, setRecords] = React.useState<ReadingRecord[]>([])
+  const { user } = useAuth()
+  const uid = user?.uid ?? null
+
   const [selectedVerses, setSelectedVerses] = React.useState<Set<number>>(new Set())
   const [currentRecordId, setCurrentRecordId] = React.useState<string | null>(null)
   const [currentContext, setCurrentContext] = React.useState<{
@@ -45,9 +75,12 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
     chapter: number
     versionId: string
   } | null>(null)
-  const [isLoading, setIsLoading] = React.useState(true)
 
-  // Load records from localStorage on mount
+  // Signed-out path: local-only storage, unchanged from before account sync
+  // existed. Never read again once signed in (FR-009, FR-011).
+  const [localRecords, setLocalRecords] = React.useState<ReadingRecord[]>([])
+  const [isLocalLoading, setIsLocalLoading] = React.useState(true)
+
   React.useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
@@ -58,21 +91,16 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
           ...record,
           verses: record.verses || []
         }))
-        // Sort by timestamp descending (newest first)
-        const sorted = migrated.sort(
-          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        )
-        setRecords(sorted)
+        setLocalRecords(sortByTimestampDesc(migrated))
       }
     } catch (error) {
       console.error("Failed to load reading history:", error)
     } finally {
-      setIsLoading(false)
+      setIsLocalLoading(false)
     }
   }, [])
 
-  // Save records to localStorage
-  const saveRecords = React.useCallback((newRecords: ReadingRecord[]) => {
+  const saveLocalRecords = React.useCallback((newRecords: ReadingRecord[]) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newRecords))
     } catch (error) {
@@ -80,21 +108,180 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
     }
   }, [])
 
-  // Update current record's verses
-  const updateCurrentRecord = React.useCallback((newVerses: Set<number>) => {
-    if (!currentRecordId) return
+  // Signed-in path: Firestore-backed, with a localStorage pending queue for
+  // writes made while offline (or whose direct write failed).
+  const [remoteRecords, setRemoteRecords] = React.useState<ReadingRecord[]>([])
+  const [isRemoteLoading, setIsRemoteLoading] = React.useState(true)
+  const [pendingOps, setPendingOps] = React.useState<PendingOp[]>([])
 
-    setRecords(prev => {
-      const updated = prev.map(record => {
-        if (record.id === currentRecordId) {
-          return { ...record, verses: Array.from(newVerses).sort((a, b) => a - b) }
+  const refreshPendingOps = React.useCallback(() => {
+    setPendingOps(listPending())
+  }, [])
+
+  const flushPending = React.useCallback(async () => {
+    if (!uid) return
+    if (typeof navigator !== "undefined" && !navigator.onLine) return
+
+    const pending = listPending()
+    if (pending.length === 0) return
+
+    const flushedIds: string[] = []
+    for (const op of pending) {
+      try {
+        if (op.type === "clear") {
+          const snapshot = await getDocs(collection(db, "users", uid, "readingHistory"))
+          await Promise.all(snapshot.docs.map(d => deleteDoc(d.ref)))
+        } else if (op.type === "upsert" && op.record) {
+          await setDoc(
+            doc(db, "users", uid, "readingHistory", op.record.id),
+            toFirestoreDoc(op.record)
+          )
+        } else if (op.type === "delete" && op.recordId) {
+          await deleteDoc(doc(db, "users", uid, "readingHistory", op.recordId))
         }
-        return record
-      })
-      saveRecords(updated)
-      return updated
-    })
-  }, [currentRecordId, saveRecords])
+        flushedIds.push(op.id)
+      } catch (error) {
+        console.error("Failed to sync reading history:", error)
+        // Leave this and any remaining items queued for the next trigger.
+        break
+      }
+    }
+
+    if (flushedIds.length > 0) {
+      removePending(flushedIds)
+      refreshPendingOps()
+    }
+  }, [uid, refreshPendingOps])
+
+  // Every mutation goes through the pending queue, then an immediate flush
+  // attempt. When online the flush resolves right away, so this behaves the
+  // same as a direct write; when offline the op simply stays queued until
+  // the "online" event (or the next sign-in) drains it.
+  const persistUpsert = React.useCallback(
+    (record: ReadingRecord) => {
+      enqueue({ id: generateId(), type: "upsert", record })
+      refreshPendingOps()
+      void flushPending()
+    },
+    [refreshPendingOps, flushPending]
+  )
+
+  const persistDelete = React.useCallback(
+    (recordId: string) => {
+      enqueue({ id: generateId(), type: "delete", recordId })
+      refreshPendingOps()
+      void flushPending()
+    },
+    [refreshPendingOps, flushPending]
+  )
+
+  const persistClear = React.useCallback(() => {
+    enqueue({ id: generateId(), type: "clear" })
+    refreshPendingOps()
+    void flushPending()
+  }, [refreshPendingOps, flushPending])
+
+  // Subscribe to the signed-in user's Firestore history; drop it immediately
+  // on sign-out (the `records` memo below falls back to `localRecords` the
+  // instant `uid` becomes null, before this effect's cleanup even runs).
+  React.useEffect(() => {
+    if (!uid) {
+      setRemoteRecords([])
+      setPendingOps([])
+      setIsRemoteLoading(true)
+      return
+    }
+
+    setIsRemoteLoading(true)
+    refreshPendingOps()
+    void flushPending()
+
+    const q = query(
+      collection(db, "users", uid, "readingHistory"),
+      orderBy("timestamp", "desc"),
+      limit(MAX_RECORDS)
+    )
+    const unsubscribe = onSnapshot(
+      q,
+      snapshot => {
+        setRemoteRecords(snapshot.docs.map(d => fromFirestoreDoc(d.id, d.data())))
+        setIsRemoteLoading(false)
+      },
+      error => {
+        console.error("Reading history subscription failed:", error)
+        setIsRemoteLoading(false)
+      }
+    )
+    return () => unsubscribe()
+  }, [uid, flushPending, refreshPendingOps])
+
+  // Drain the queue once connectivity returns.
+  React.useEffect(() => {
+    if (!uid) return
+    const handleOnline = () => {
+      void flushPending()
+    }
+    window.addEventListener("online", handleOnline)
+    return () => window.removeEventListener("online", handleOnline)
+  }, [uid, flushPending])
+
+  // Merge queued-but-not-yet-flushed ops into the Firestore snapshot for
+  // optimistic UI.
+  const { pendingUpserts, pendingDeletes, pendingClear } = React.useMemo(() => {
+    const upserts = new Map<string, ReadingRecord>()
+    const deletes = new Set<string>()
+    let clear = false
+
+    for (const op of pendingOps) {
+      if (op.type === "clear") {
+        clear = true
+        upserts.clear()
+        deletes.clear()
+      } else if (op.type === "upsert" && op.record) {
+        upserts.set(op.record.id, op.record)
+        deletes.delete(op.record.id)
+      } else if (op.type === "delete" && op.recordId) {
+        deletes.add(op.recordId)
+        upserts.delete(op.recordId)
+      }
+    }
+
+    return { pendingUpserts: upserts, pendingDeletes: deletes, pendingClear: clear }
+  }, [pendingOps])
+
+  const remoteMergedRecords = React.useMemo(() => {
+    const base = pendingClear ? [] : remoteRecords.filter(r => !pendingDeletes.has(r.id))
+    const merged = new Map<string, ReadingRecord>()
+    for (const record of base) merged.set(record.id, record)
+    for (const record of pendingUpserts.values()) merged.set(record.id, record)
+    return sortByTimestampDesc(Array.from(merged.values()))
+  }, [remoteRecords, pendingUpserts, pendingDeletes, pendingClear])
+
+  const records = uid ? remoteMergedRecords : localRecords
+  const isLoading = uid ? isRemoteLoading : isLocalLoading
+
+  // Update current record's verses
+  const updateCurrentRecord = React.useCallback(
+    (newVerses: Set<number>) => {
+      if (!currentRecordId) return
+      const sortedVerses = Array.from(newVerses).sort((a, b) => a - b)
+
+      if (uid) {
+        const existing = records.find(record => record.id === currentRecordId)
+        if (!existing) return
+        persistUpsert({ ...existing, verses: sortedVerses })
+      } else {
+        setLocalRecords(prev => {
+          const updated = prev.map(record =>
+            record.id === currentRecordId ? { ...record, verses: sortedVerses } : record
+          )
+          saveLocalRecords(updated)
+          return updated
+        })
+      }
+    },
+    [currentRecordId, uid, records, persistUpsert, saveLocalRecords]
+  )
 
   // Set chapter context - stores context for later record creation
   const setChapterContext = React.useCallback(
@@ -108,28 +295,35 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
   )
 
   // Create a new record for the current context
-  const createRecord = React.useCallback((verses: Set<number>) => {
-    if (!currentContext || verses.size === 0) return null
+  const createRecord = React.useCallback(
+    (verses: Set<number>) => {
+      if (!currentContext || verses.size === 0) return null
 
-    const newRecord = createReadingRecord(
-      currentContext.bookId,
-      currentContext.chapter,
-      Array.from(verses),
-      currentContext.versionId
-    )
+      const newRecord = createReadingRecord(
+        currentContext.bookId,
+        currentContext.chapter,
+        Array.from(verses),
+        currentContext.versionId
+      )
 
-    setRecords(prev => {
-      let updated = [newRecord, ...prev]
-      if (updated.length > MAX_RECORDS) {
-        updated = updated.slice(0, MAX_RECORDS)
+      if (uid) {
+        persistUpsert(newRecord)
+      } else {
+        setLocalRecords(prev => {
+          let updated = [newRecord, ...prev]
+          if (updated.length > MAX_RECORDS) {
+            updated = updated.slice(0, MAX_RECORDS)
+          }
+          saveLocalRecords(updated)
+          return updated
+        })
       }
-      saveRecords(updated)
-      return updated
-    })
 
-    setCurrentRecordId(newRecord.id)
-    return newRecord.id
-  }, [currentContext, saveRecords])
+      setCurrentRecordId(newRecord.id)
+      return newRecord.id
+    },
+    [currentContext, uid, persistUpsert, saveLocalRecords]
+  )
 
   // Toggle verse selection (auto-saves)
   const toggleVerse = React.useCallback((verse: number) => {
@@ -150,17 +344,21 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
         }
       } else if (currentRecordId) {
         // All verses deselected - remove the record
-        setRecords(prevRecords => {
-          const updated = prevRecords.filter(r => r.id !== currentRecordId)
-          saveRecords(updated)
-          return updated
-        })
+        if (uid) {
+          persistDelete(currentRecordId)
+        } else {
+          setLocalRecords(prevRecords => {
+            const updated = prevRecords.filter(r => r.id !== currentRecordId)
+            saveLocalRecords(updated)
+            return updated
+          })
+        }
         setCurrentRecordId(null)
       }
 
       return newSet
     })
-  }, [currentRecordId, updateCurrentRecord, createRecord, saveRecords])
+  }, [currentRecordId, updateCurrentRecord, createRecord, uid, persistDelete, saveLocalRecords])
 
   // Select all verses (auto-saves)
   const selectAllVerses = React.useCallback((totalVerses: number) => {
@@ -182,15 +380,19 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
     setSelectedVerses(new Set())
 
     if (currentRecordId) {
-      // Remove the record since no verses are selected
-      setRecords(prev => {
-        const updated = prev.filter(r => r.id !== currentRecordId)
-        saveRecords(updated)
-        return updated
-      })
+      if (uid) {
+        persistDelete(currentRecordId)
+      } else {
+        // Remove the record since no verses are selected
+        setLocalRecords(prev => {
+          const updated = prev.filter(r => r.id !== currentRecordId)
+          saveLocalRecords(updated)
+          return updated
+        })
+      }
       setCurrentRecordId(null)
     }
-  }, [currentRecordId, saveRecords])
+  }, [currentRecordId, uid, persistDelete, saveLocalRecords])
 
   // Reset selection UI without saving (for fresh starts on mount)
   const resetSelection = React.useCallback(() => {
@@ -200,31 +402,40 @@ export function ReadingHistoryProvider({ children }: { children: React.ReactNode
   // Delete a specific record
   const deleteRecord = React.useCallback(
     (recordId: string) => {
-      setRecords(prev => {
-        const updated = prev.filter(r => r.id !== recordId)
-        saveRecords(updated)
-        return updated
-      })
+      if (uid) {
+        persistDelete(recordId)
+      } else {
+        setLocalRecords(prev => {
+          const updated = prev.filter(r => r.id !== recordId)
+          saveLocalRecords(updated)
+          return updated
+        })
+      }
       // If deleting current record, clear selection
       if (recordId === currentRecordId) {
         setCurrentRecordId(null)
         setSelectedVerses(new Set())
       }
     },
-    [saveRecords, currentRecordId]
+    [uid, persistDelete, saveLocalRecords, currentRecordId]
   )
 
   // Clear all history
   const clearHistory = React.useCallback(() => {
-    setRecords([])
     setSelectedVerses(new Set())
     setCurrentRecordId(null)
-    try {
-      localStorage.removeItem(STORAGE_KEY)
-    } catch (error) {
-      console.error("Failed to clear reading history:", error)
+
+    if (uid) {
+      persistClear()
+    } else {
+      setLocalRecords([])
+      try {
+        localStorage.removeItem(STORAGE_KEY)
+      } catch (error) {
+        console.error("Failed to clear reading history:", error)
+      }
     }
-  }, [])
+  }, [uid, persistClear])
 
   return (
     <ReadingHistoryContext.Provider

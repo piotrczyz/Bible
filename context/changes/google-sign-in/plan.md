@@ -513,17 +513,17 @@ to existing data.
 
 ### Phase 3: Firestore schema, security rules, and sync queue
 #### Automated
-- [x] 3.1 `pnpm typecheck` passes
-- [x] 3.2 `pnpm build` passes
-- [x] 3.3 `pnpm lint` passes
+- [x] 3.1 `pnpm typecheck` passes — 0dd52c4
+- [x] 3.2 `pnpm build` passes — 0dd52c4
+- [x] 3.3 `pnpm lint` passes — 0dd52c4
 #### Manual
 - [ ] 3.4 Deployed `firestore.rules` deny a non-owner read/write to another uid's `readingHistory`
 
 ### Phase 4: Account-backed reading history provider
 #### Automated
-- [ ] 4.1 `pnpm typecheck` passes
-- [ ] 4.2 `pnpm build` passes
-- [ ] 4.3 `pnpm lint` passes
+- [x] 4.1 `pnpm typecheck` passes
+- [x] 4.2 `pnpm build` passes
+- [x] 4.3 `pnpm lint` passes
 #### Manual
 - [ ] 4.4 Signing in with the same account on a second device/profile shows device A's readings
 - [ ] 4.5 Readings made offline while signed in appear in the account timeline after reconnecting, with no user action
