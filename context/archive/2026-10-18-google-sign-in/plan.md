@@ -513,17 +513,17 @@ to existing data.
 
 ### Phase 3: Firestore schema, security rules, and sync queue
 #### Automated
-- [ ] 3.1 `pnpm typecheck` passes
-- [ ] 3.2 `pnpm build` passes
-- [ ] 3.3 `pnpm lint` passes
+- [x] 3.1 `pnpm typecheck` passes — 0dd52c4
+- [x] 3.2 `pnpm build` passes — 0dd52c4
+- [x] 3.3 `pnpm lint` passes — 0dd52c4
 #### Manual
 - [ ] 3.4 Deployed `firestore.rules` deny a non-owner read/write to another uid's `readingHistory`
 
 ### Phase 4: Account-backed reading history provider
 #### Automated
-- [ ] 4.1 `pnpm typecheck` passes
-- [ ] 4.2 `pnpm build` passes
-- [ ] 4.3 `pnpm lint` passes
+- [x] 4.1 `pnpm typecheck` passes — 21d19bf
+- [x] 4.2 `pnpm build` passes — 21d19bf
+- [x] 4.3 `pnpm lint` passes — 21d19bf
 #### Manual
 - [ ] 4.4 Signing in with the same account on a second device/profile shows device A's readings
 - [ ] 4.5 Readings made offline while signed in appear in the account timeline after reconnecting, with no user action
@@ -531,9 +531,9 @@ to existing data.
 
 ### Phase 5: Gate the Timeline trigger
 #### Automated
-- [ ] 5.1 `pnpm typecheck` passes
-- [ ] 5.2 `pnpm build` passes
-- [ ] 5.3 `pnpm lint` passes
+- [x] 5.1 `pnpm typecheck` passes — 5da8c37
+- [x] 5.2 `pnpm build` passes — 5da8c37
+- [x] 5.3 `pnpm lint` passes — 5da8c37
 #### Manual
 - [ ] 5.4 A signed-out tap on the reading-history icon shows the explanation dialog; sign-in opens the timeline directly
 - [ ] 5.5 A profile with pre-existing local-only history shows an empty account timeline after sign-in, and the old `localStorage` key is untouched
